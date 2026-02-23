@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --version && npm --version && python3 --version && pip3 --version 2>&1)",
+      "Bash(echo bun not found:*)",
+      "Bash(npm create:*)",
+      "Bash(tail:*)",
+      "Bash(cd /home/wagz/wagz-dashboard/backend && python3 -c \"import main; print\\('imports OK'\\)\" 2>&1)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(npm run:*)",
+      "Bash(chmod +x:*)",
+      "Bash(ss:*)",
+      "Bash(echo:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)"
+    ]
+  }
+}
