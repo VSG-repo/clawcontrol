@@ -6,6 +6,7 @@ import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import Logs from '@/pages/Logs'
 import Chat from '@/pages/Chat'
+import Routing from '@/pages/Routing'
 
 function ProtectedApp() {
   return (
@@ -14,6 +15,7 @@ function ProtectedApp() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/routing" element={<Routing />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

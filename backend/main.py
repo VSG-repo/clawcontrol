@@ -25,6 +25,7 @@ import routers.models as models_router
 import routers.logs as logs_router
 import routers.notifications as notifications_router
 import routers.chat as chat_router
+import routers.routing as routing_router
 
 
 @asynccontextmanager
@@ -65,6 +66,7 @@ app.include_router(models_router.router)
 app.include_router(logs_router.router)
 app.include_router(notifications_router.router)
 app.include_router(chat_router.router)
+app.include_router(routing_router.router)
 
 
 # Auth endpoints
