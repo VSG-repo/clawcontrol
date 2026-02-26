@@ -1,3 +1,10 @@
+"""
+Model Routing Controls router — Phase 4
+
+Config split:
+  openclaw.json        — agents.defaults.model (primary + fallbacks) — read/written here
+  clawcontrol.json     — manual_override, heartbeat — read/written here
+"""
 import json
 import os
 from pathlib import Path
@@ -11,7 +18,8 @@ from services.models import get_model_stack
 
 router = APIRouter()
 
-OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
+OPENCLAW_CONFIG    = Path.home() / ".openclaw" / "openclaw.json"
+CLAWCONTROL_CONFIG = Path.home() / ".openclaw" / "clawcontrol.json"
 
 _routing_state = {
     "primary_model_id": None,
@@ -23,6 +31,8 @@ _routing_state = {
     },
 }
 
+
+# ── Pydantic models ───────────────────────────────────────────────────────────
 
 class ManualOverrideUpdate(BaseModel):
     enabled: Optional[bool] = None
@@ -41,16 +51,46 @@ class HeartbeatUpdate(BaseModel):
     interval_seconds: int
 
 
-def _default_config() -> dict:
+# ── IO helpers ────────────────────────────────────────────────────────────────
+
+def _atomic_write_json(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    with tmp_path.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+        f.flush()
+        os.fsync(f.fileno())
+    tmp_path.replace(path)
+
+
+def _load_json(path: Path, context: str = "config") -> dict:
+    if not path.exists():
+        return {}
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read {context}: {e}")
+    return data if isinstance(data, dict) else {}
+
+
+def _load_openclaw() -> dict:
+    return _load_json(OPENCLAW_CONFIG, "openclaw.json")
+
+
+def _load_cc() -> dict:
+    return _load_json(CLAWCONTROL_CONFIG, "clawcontrol.json")
+
+
+# ── Routing logic ─────────────────────────────────────────────────────────────
+
+def _default_openclaw() -> dict:
+    return {"agents": {"defaults": {"model": {"primary": None, "fallbacks": []}}}}
+
+
+def _default_cc() -> dict:
     return {
-        "agents": {
-            "defaults": {
-                "model": {
-                    "primary": None,
-                    "fallbacks": [],
-                }
-            }
-        },
         "dashboard": {
             "routing": {
                 "manual_override": {
@@ -67,107 +107,68 @@ def _default_config() -> dict:
     }
 
 
-def _atomic_write_json(path: Path, data: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-
-    with tmp_path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-        f.write("\n")
-        f.flush()
-        os.fsync(f.fileno())
-
-    tmp_path.replace(path)
-
-
-def _load_config() -> dict:
-    if not OPENCLAW_CONFIG.exists():
-        config = _default_config()
-        _atomic_write_json(OPENCLAW_CONFIG, config)
-        return config
-
-    try:
-        with OPENCLAW_CONFIG.open("r", encoding="utf-8") as f:
-            config = json.load(f)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read routing config: {e}")
-
-    if not isinstance(config, dict):
-        config = {}
-
-    return config
-
-
-def _routing_from_config(config: dict) -> dict:
-    agents = config.setdefault("agents", {})
-    defaults = agents.setdefault("defaults", {})
-    model = defaults.setdefault("model", {})
-
-    dashboard = config.setdefault("dashboard", {})
-    routing = dashboard.setdefault("routing", {})
-
-    manual = routing.setdefault("manual_override", {})
-
-    primary = model.get("primary")
+def _routing_from_configs(oc: dict, cc: dict) -> dict:
+    # Model stack lives in openclaw.json
+    model = oc.get("agents", {}).get("defaults", {}).get("model", {})
+    primary   = model.get("primary")
     fallbacks = model.get("fallbacks", [])
-
     if not isinstance(fallbacks, list):
         fallbacks = []
 
-    manual_enabled = bool(manual.get("enabled", False))
-    manual_model = manual.get("model_id")
+    # Manual override lives in clawcontrol.json
+    manual = cc.get("dashboard", {}).get("routing", {}).get("manual_override", {})
+    manual_enabled  = bool(manual.get("enabled", False))
+    manual_model    = manual.get("model_id")
     manual_requests = manual.get("requests_remaining", 0)
     if not isinstance(manual_requests, int) or manual_requests < 0:
         manual_requests = 0
 
     return {
-        "primary_model_id": primary,
+        "primary_model_id":  primary,
         "fallback_model_ids": [m for m in fallbacks if isinstance(m, str)],
         "manual_override": {
-            "enabled": manual_enabled,
-            "model_id": manual_model if isinstance(manual_model, str) or manual_model is None else None,
+            "enabled":            manual_enabled,
+            "model_id":           manual_model if isinstance(manual_model, str) or manual_model is None else None,
             "requests_remaining": manual_requests,
         },
     }
 
 
-def _apply_routing_to_config(config: dict, routing: dict) -> dict:
-    agents = config.setdefault("agents", {})
+def _apply_routing(oc: dict, cc: dict, routing: dict) -> None:
+    """Write model stack to openclaw.json; write override to clawcontrol.json."""
+    # openclaw.json — agents.defaults.model
+    agents   = oc.setdefault("agents", {})
     defaults = agents.setdefault("defaults", {})
-    model = defaults.setdefault("model", {})
-
-    dashboard = config.setdefault("dashboard", {})
-    routing_cfg = dashboard.setdefault("routing", {})
-
-    model["primary"] = routing["primary_model_id"]
+    model    = defaults.setdefault("model", {})
+    model["primary"]   = routing["primary_model_id"]
     model["fallbacks"] = routing["fallback_model_ids"]
+    _atomic_write_json(OPENCLAW_CONFIG, oc)
+
+    # clawcontrol.json — dashboard.routing.manual_override
+    dash    = cc.setdefault("dashboard", {})
+    routing_cfg = dash.setdefault("routing", {})
     routing_cfg["manual_override"] = routing["manual_override"]
-
-    return config
-
-
-def _heartbeat_from_config(config: dict) -> dict:
-    heartbeat = config.setdefault("heartbeat", {})
-
-    enabled = bool(heartbeat.get("enabled", False))
-    interval_seconds = heartbeat.get("interval_seconds", 60)
-    if not isinstance(interval_seconds, int):
-        interval_seconds = 60
-    interval_seconds = max(30, min(1800, interval_seconds))
-
-    return {
-        "enabled": enabled,
-        "interval_seconds": interval_seconds,
-    }
+    _atomic_write_json(CLAWCONTROL_CONFIG, cc)
 
 
-def _apply_heartbeat_to_config(config: dict, heartbeat: dict) -> dict:
-    config["heartbeat"] = {
-        "enabled": heartbeat["enabled"],
-        "interval_seconds": heartbeat["interval_seconds"],
-    }
-    return config
+# ── Heartbeat logic ───────────────────────────────────────────────────────────
 
+def _heartbeat_from_cc(cc: dict) -> dict:
+    hb = cc.get("heartbeat", {})
+    enabled  = bool(hb.get("enabled", False))
+    interval = hb.get("interval_seconds", 60)
+    if not isinstance(interval, int):
+        interval = 60
+    interval = max(30, min(1800, interval))
+    return {"enabled": enabled, "interval_seconds": interval}
+
+
+def _apply_heartbeat_to_cc(cc: dict, heartbeat: dict) -> None:
+    cc["heartbeat"] = heartbeat
+    _atomic_write_json(CLAWCONTROL_CONFIG, cc)
+
+
+# ── Validation ────────────────────────────────────────────────────────────────
 
 def _validate_payload(body: RoutingUpdate) -> None:
     if body.fallback_model_ids is not None:
@@ -187,30 +188,27 @@ def _validate_payload(body: RoutingUpdate) -> None:
             raise HTTPException(status_code=400, detail="model_id must be a non-empty string")
 
 
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
 @router.get("/api/routing")
 def get_routing(_=Depends(require_auth)):
-    config = _load_config()
-    routing = _routing_from_config(config)
-
+    oc = _load_openclaw()
+    cc = _load_cc()
+    routing = _routing_from_configs(oc, cc)
     _routing_state.update(routing)
-
-    # Ensure missing defaults are persisted to disk.
-    updated_config = _apply_routing_to_config(config, routing)
-    _atomic_write_json(OPENCLAW_CONFIG, updated_config)
-
+    # Persist any missing defaults
+    _apply_routing(oc, cc, routing)
     stack = get_model_stack()
-    return {
-        "routing": routing,
-        "models": stack["models"],
-    }
+    return {"routing": routing, "models": stack["models"]}
 
 
 @router.post("/api/routing")
 def update_routing(body: RoutingUpdate, _=Depends(require_auth)):
     _validate_payload(body)
 
-    config = _load_config()
-    routing = _routing_from_config(config)
+    oc = _load_openclaw()
+    cc = _load_cc()
+    routing = _routing_from_configs(oc, cc)
 
     if body.primary_model_id is not None:
         routing["primary_model_id"] = body.primary_model_id
@@ -220,34 +218,20 @@ def update_routing(body: RoutingUpdate, _=Depends(require_auth)):
 
     if body.manual_override is not None:
         update = body.manual_override.model_dump(exclude_none=True)
-        routing["manual_override"] = {
-            **routing["manual_override"],
-            **update,
-        }
+        routing["manual_override"] = {**routing["manual_override"], **update}
 
-    updated_config = _apply_routing_to_config(config, routing)
-    _atomic_write_json(OPENCLAW_CONFIG, updated_config)
-
+    _apply_routing(oc, cc, routing)
     _routing_state.update(routing)
 
-    return {
-        "ok": True,
-        "routing": routing,
-    }
+    return {"ok": True, "routing": routing}
 
 
 @router.get("/api/heartbeat")
 def get_heartbeat(_=Depends(require_auth)):
-    config = _load_config()
-    heartbeat = _heartbeat_from_config(config)
-
-    updated_config = _apply_heartbeat_to_config(config, heartbeat)
-    _atomic_write_json(OPENCLAW_CONFIG, updated_config)
-
-    return {
-        "ok": True,
-        "heartbeat": heartbeat,
-    }
+    cc = _load_cc()
+    heartbeat = _heartbeat_from_cc(cc)
+    _apply_heartbeat_to_cc(cc, heartbeat)
+    return {"ok": True, "heartbeat": heartbeat}
 
 
 @router.post("/api/heartbeat")
@@ -255,16 +239,11 @@ def update_heartbeat(body: HeartbeatUpdate, _=Depends(require_auth)):
     if body.interval_seconds < 30 or body.interval_seconds > 1800:
         raise HTTPException(status_code=400, detail="interval_seconds must be between 30 and 1800")
 
-    config = _load_config()
+    cc = _load_cc()
     heartbeat = {
-        "enabled": bool(body.enabled),
-        "interval_seconds": int(body.interval_seconds),
+        "enabled":            bool(body.enabled),
+        "interval_seconds":   int(body.interval_seconds),
     }
+    _apply_heartbeat_to_cc(cc, heartbeat)
 
-    updated_config = _apply_heartbeat_to_config(config, heartbeat)
-    _atomic_write_json(OPENCLAW_CONFIG, updated_config)
-
-    return {
-        "ok": True,
-        "heartbeat": heartbeat,
-    }
+    return {"ok": True, "heartbeat": heartbeat}

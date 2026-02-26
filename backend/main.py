@@ -2,11 +2,74 @@
 WAGZ Control Panel — FastAPI Backend
 Phase 1: System Status & Health Monitoring
 """
+import json
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv()
+
+
+def _migrate_to_clawcontrol():
+    """
+    One-time migration: move ClawControl-specific keys ('heartbeat', 'dashboard')
+    from ~/.openclaw/openclaw.json into ~/.openclaw/clawcontrol.json so OpenClaw
+    doesn't flag them as unrecognised config.
+
+    Skipped if clawcontrol.json already exists (migration already done).
+    """
+    openclaw_path    = Path.home() / ".openclaw" / "openclaw.json"
+    clawcontrol_path = Path.home() / ".openclaw" / "clawcontrol.json"
+
+    if clawcontrol_path.exists():
+        return  # already migrated
+
+    if not openclaw_path.exists():
+        return  # nothing to migrate
+
+    try:
+        with openclaw_path.open("r", encoding="utf-8") as f:
+            oc_data = json.load(f)
+    except Exception:
+        return
+
+    if not isinstance(oc_data, dict):
+        return
+
+    if "heartbeat" not in oc_data and "dashboard" not in oc_data:
+        return  # no ClawControl keys present — nothing to do
+
+    cc_data = {}
+    if "heartbeat" in oc_data:
+        cc_data["heartbeat"] = oc_data.pop("heartbeat")
+    if "dashboard" in oc_data:
+        cc_data["dashboard"] = oc_data.pop("dashboard")
+
+    try:
+        # Write clawcontrol.json first
+        clawcontrol_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = clawcontrol_path.with_suffix(".json.tmp")
+        with tmp.open("w", encoding="utf-8") as f:
+            json.dump(cc_data, f, indent=2)
+            f.write("\n")
+            f.flush()
+            os.fsync(f.fileno())
+        tmp.replace(clawcontrol_path)
+
+        # Then write cleaned openclaw.json
+        tmp = openclaw_path.with_suffix(".json.tmp")
+        with tmp.open("w", encoding="utf-8") as f:
+            json.dump(oc_data, f, indent=2)
+            f.write("\n")
+            f.flush()
+            os.fsync(f.fileno())
+        tmp.replace(openclaw_path)
+    except Exception:
+        pass  # don't crash startup on migration failure
+
+
+_migrate_to_clawcontrol()
 
 import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException

@@ -1,6 +1,6 @@
 """
 Credentials & Keys router — Phase 5
-Stores under dashboard.keys.<provider> and dashboard.circuit_breaker in openclaw.json.
+Stores under dashboard.keys.<provider> and dashboard.circuit_breaker in clawcontrol.json.
 """
 import json
 import os
@@ -16,7 +16,7 @@ from auth import require_auth
 
 router = APIRouter()
 
-OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
+CLAWCONTROL_CONFIG = Path.home() / ".openclaw" / "clawcontrol.json"
 
 PROVIDERS = {
     "openrouter": {
@@ -90,10 +90,10 @@ def _atomic_write_json(path: Path, data: dict) -> None:
 
 
 def _load_config() -> dict:
-    if not OPENCLAW_CONFIG.exists():
+    if not CLAWCONTROL_CONFIG.exists():
         return {}
     try:
-        with OPENCLAW_CONFIG.open("r", encoding="utf-8") as f:
+        with CLAWCONTROL_CONFIG.open("r", encoding="utf-8") as f:
             config = json.load(f)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read config: {e}")
@@ -219,7 +219,7 @@ def add_key(body: AddKeyRequest):
         "status":     status,
     }
     config["dashboard"]["keys"] = stored
-    _atomic_write_json(OPENCLAW_CONFIG, config)
+    _atomic_write_json(CLAWCONTROL_CONFIG, config)
 
     return {
         "ok":       True,
@@ -255,7 +255,7 @@ def rotate_key(body: RotateKeyRequest):
         "status":       status,
     }
     config["dashboard"]["keys"] = stored
-    _atomic_write_json(OPENCLAW_CONFIG, config)
+    _atomic_write_json(CLAWCONTROL_CONFIG, config)
 
     return {
         "ok":       True,
@@ -276,7 +276,7 @@ def delete_key(provider: str):
 
     del stored[provider]
     config["dashboard"]["keys"] = stored
-    _atomic_write_json(OPENCLAW_CONFIG, config)
+    _atomic_write_json(CLAWCONTROL_CONFIG, config)
 
     return {"ok": True, "provider": provider}
 
@@ -295,7 +295,7 @@ def check_key(provider: str):
 
     stored[provider]["status"] = status
     config["dashboard"]["keys"] = stored
-    _atomic_write_json(OPENCLAW_CONFIG, config)
+    _atomic_write_json(CLAWCONTROL_CONFIG, config)
 
     return {
         "ok":       True,
@@ -330,6 +330,6 @@ def update_circuit_breaker(body: CircuitBreakerUpdate):
         cb["hard_stop"] = bool(body.hard_stop)
 
     config["dashboard"]["circuit_breaker"] = cb
-    _atomic_write_json(OPENCLAW_CONFIG, config)
+    _atomic_write_json(CLAWCONTROL_CONFIG, config)
 
     return {"ok": True, "circuit_breaker": cb}
