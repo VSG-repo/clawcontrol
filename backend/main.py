@@ -27,6 +27,7 @@ import routers.notifications as notifications_router
 import routers.chat as chat_router
 import routers.routing as routing_router
 import routers.observe as observe_router
+import routers.keys as keys_router
 
 
 @asynccontextmanager
@@ -55,7 +56,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -69,6 +70,7 @@ app.include_router(notifications_router.router)
 app.include_router(chat_router.router)
 app.include_router(routing_router.router)
 app.include_router(observe_router.router)
+app.include_router(keys_router.router)
 
 
 # Auth endpoints

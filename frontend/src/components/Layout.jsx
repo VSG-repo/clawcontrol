@@ -24,7 +24,7 @@ const NAV = [
   { to: '/logs', label: 'Logs', icon: ScrollText },
   { to: '/chat', label: 'Chat', icon: MessageSquare },
   { to: '/routing', label: 'Routing', icon: Cpu },
-  { to: '/keys', label: 'Keys', icon: Key, disabled: true },
+  { to: '/keys', label: 'Keys', icon: Key },
   { to: '/media', label: 'Media', icon: Image, disabled: true },
   { to: '/prompts', label: 'Prompts', icon: BookOpen, disabled: true },
   { to: '/news', label: 'News', icon: Rss, disabled: true },
