@@ -289,6 +289,20 @@ function EmptyState({ text }) {
   )
 }
 
+const STATUS_LABELS = {
+  active:      'Active',
+  idle:        'Idle',
+  archived:    'Archived',
+  success:     'Success',
+  error:       'Error',
+  pending:     'Pending',
+  failed:      'Failed',
+  quarantined: 'Quarantined',
+  delivered:   'Delivered',
+  running:     'Running',
+  completed:   'Completed',
+}
+
 function StatusPill({ status }) {
   const map = {
     active:      { color: '#E8472A', bg: '#E8472A20', border: '#E8472A40', dot: true },
@@ -308,7 +322,7 @@ function StatusPill({ status }) {
     <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded font-medium"
       style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
       {cfg.dot && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: cfg.color }} />}
-      {status}
+      {STATUS_LABELS[status] ?? status}
     </span>
   )
 }
@@ -358,6 +372,119 @@ function TabCard({ children }) {
       {children}
     </div>
   )
+}
+
+// ── Display helpers ──────────────────────────────────────────────────────────
+
+function sessionLabel(key) {
+  const parts = key.split(':')
+  if (parts.length === 3 && parts[2] === 'main') return { label: 'WAGZ (Main)', sub: null }
+  if (parts.length === 4 && parts[2] === 'cron') return { label: 'Scheduled Task', sub: parts[3].slice(0, 8) + '…' }
+  if (parts.length === 4 && parts[2] === 'openai') return { label: 'OpenAI Sub-agent', sub: parts[3].slice(0, 8) + '…' }
+  if (parts.length === 6 && parts[4] === 'run') return { label: 'Task Run', sub: parts[5].slice(0, 8) + '…' }
+  return { label: parts.slice(2).join(':'), sub: null }
+}
+
+const MODEL_NAMES = {
+  'gpt-5.1-codex-max': 'Codex Max',
+  'openai-codex':       'Codex',
+  'gpt-4o':             'GPT-4o',
+  'gpt-4o-mini':        'GPT-4o Mini',
+  'gpt-4.5':            'GPT-4.5',
+  'gpt-oss-20b':        'GPT OSS 20B',
+  'claude-3-5-sonnet':  'Sonnet 3.5',
+  'claude-3-5-haiku':   'Haiku 3.5',
+  'claude-3-7-sonnet':  'Sonnet 3.7',
+  'claude-opus-4-5':    'Opus 4.5',
+  'claude-sonnet-4-5':  'Sonnet 4.5',
+  'claude-haiku-4-5':   'Haiku 4.5',
+}
+
+function modelLabel(model) {
+  if (!model) return '—'
+  const base = model.includes('/') ? model.split('/').pop() : model
+  if (MODEL_NAMES[base]) return MODEL_NAMES[base]
+  if (MODEL_NAMES[model]) return MODEL_NAMES[model]
+  return base.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+function cronHuman(scheduleKind, expr) {
+  if (scheduleKind === 'at') {
+    try { return `Once — ${absTime(expr)}` } catch { return expr }
+  }
+  if (!expr) return '—'
+  const parts = expr.trim().split(/\s+/)
+  if (parts.length !== 5) return expr
+  const [min, hour, dom, , dow] = parts
+  const pad = n => String(n).padStart(2, '0')
+  const t = `${pad(hour)}:${pad(min)}`
+  if (dom.startsWith('*/') && dow === '*') return `Every ${dom.slice(2)} days at ${t}`
+  if (dom === '*' && dow === '*' && hour !== '*') return `Daily at ${t}`
+  if (hour.startsWith('*/') && dom === '*') return `Every ${hour.slice(2)} hours`
+  if (hour === '*' && dom === '*') return 'Hourly'
+  return expr
+}
+
+function fmtDuration(ms) {
+  if (ms == null) return '—'
+  if (ms < 1000) return `${ms}ms`
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`
+  const m = Math.floor(ms / 60_000)
+  const s = Math.round((ms % 60_000) / 1000)
+  return s > 0 ? `${m}m ${s}s` : `${m}m`
+}
+
+const EXEC_HUMANIZE = [
+  [/^openclaw\s+update/i,   'Running OpenClaw update'],
+  [/^openclaw\s+models/i,   'Listing models'],
+  [/^openclaw\s+sessions/i, 'Listing sessions'],
+  [/^openclaw\s+status/i,   'Checking OpenClaw status'],
+  [/^openclaw\s+channels/i, 'Checking channels'],
+  [/^git\s+commit/i,        'Committing changes'],
+  [/^git\s+push/i,          'Pushing to remote'],
+  [/^git\s+pull/i,          'Pulling latest changes'],
+  [/^git\s+add/i,           'Staging files'],
+  [/^npm\s+install/i,       'Installing npm packages'],
+  [/^pip\s+install/i,       'Installing Python packages'],
+  [/^rm\s+-rf/i,            'Deleting files'],
+  [/^mkdir/i,               'Creating directory'],
+  [/^curl\s+/i,             'HTTP request'],
+  [/^python\s+/i,           'Running Python script'],
+  [/^node\s+/i,             'Running Node script'],
+  [/^bash\s+/i,             'Running shell script'],
+]
+
+function humanSummary(summary) {
+  if (!summary) return ''
+  if (summary.startsWith('exec: ')) {
+    const cmd = summary.slice(6).trim()
+    for (const [pat, label] of EXEC_HUMANIZE) {
+      if (pat.test(cmd)) return label
+    }
+    return `Running: ${cmd.length > 50 ? cmd.slice(0, 50) + '…' : cmd}`
+  }
+  if (summary.startsWith('process.poll: '))  return `Monitoring: ${summary.slice(14)}`
+  if (summary.startsWith('process.start: ')) return `Starting: ${summary.slice(15)}`
+  if (summary.startsWith('process.stop: '))  return `Stopping: ${summary.slice(14)}`
+  if (summary.startsWith('read: '))  return `Reading: ${summary.slice(6).split('/').pop()}`
+  if (summary.startsWith('write: ')) return `Writing: ${summary.slice(7).split('/').pop()}`
+  if (summary.startsWith('search: ')) return `Searching: ${summary.slice(8)}`
+  return summary
+}
+
+function translateCronError(err) {
+  if (!err) return null
+  if (/unknown model/i.test(err)) return 'Model not found — update model in Routing'
+  if (/cron delivery target is missing|delivery target.*missing|missing.*delivery/i.test(err))
+    return 'No delivery channel set — configure in Channels'
+  return err
+}
+
+const ISO_TS_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?\s*/
+
+function stripTimestamp(s) {
+  if (!s) return s
+  return s.replace(ISO_TS_RE, '').trim()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -422,22 +549,25 @@ function SessionsTab({ authToken }) {
         <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 320px)' }}>
           {filtered.length === 0
             ? <EmptyState text={loading ? 'Loading sessions…' : 'No sessions match'} />
-            : filtered.map(s => (
-              <div key={s.key} className="grid text-xs px-3 py-2.5 border-b hover:bg-white/5 transition-colors items-center"
-                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', borderColor: '#1A1A1A' }}>
-                <div>
-                  <div className="font-mono" style={{ color: '#DDD' }}>{s.key}</div>
-                  <div className="mt-0.5" style={{ color: '#555' }}>{s.kind} · {s.agent_id}</div>
+            : filtered.map(s => {
+              const { label, sub } = sessionLabel(s.key)
+              return (
+                <div key={s.key} className="grid text-xs px-3 py-2.5 border-b hover:bg-white/5 transition-colors items-center"
+                  style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', borderColor: '#1A1A1A' }}>
+                  <div>
+                    <div className="font-semibold" style={{ color: '#DDD' }}>{label}</div>
+                    {sub && <div className="mt-0.5 font-mono" style={{ color: '#555' }}>{sub}</div>}
+                  </div>
+                  <div style={{ color: '#999' }}>{modelLabel(s.model)}</div>
+                  <div><StatusPill status={s.status} /></div>
+                  <div style={{ color: '#666' }}>{relTime(s.last_activity)}</div>
+                  <div style={{ color: '#666' }}>
+                    {s.total_tokens ? `${(s.total_tokens / 1000).toFixed(1)}k` : '—'}
+                    {s.context_tokens ? <span style={{ color: '#444' }}> / {(s.context_tokens / 1000).toFixed(0)}k</span> : null}
+                  </div>
                 </div>
-                <div style={{ color: '#999' }}>{s.model || '—'}</div>
-                <div><StatusPill status={s.status} /></div>
-                <div style={{ color: '#666' }}>{relTime(s.last_activity)}</div>
-                <div style={{ color: '#666' }}>
-                  {s.total_tokens ? `${(s.total_tokens / 1000).toFixed(1)}k` : '—'}
-                  {s.context_tokens ? <span style={{ color: '#444' }}> / {(s.context_tokens / 1000).toFixed(0)}k</span> : null}
-                </div>
-              </div>
-            ))
+              )
+            })
           }
         </div>
       </TabCard>
@@ -485,7 +615,8 @@ function CronTab({ authToken }) {
                       <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#55555520', color: '#666', border: '1px solid #33333340' }}>disabled</span>
                     )}
                   </div>
-                  <div className="text-xs mt-0.5 font-mono" style={{ color: '#666' }}>{job.schedule}</div>
+                  <div className="text-xs mt-0.5" style={{ color: '#888' }}>{cronHuman(job.schedule_kind, job.schedule)}</div>
+                  <div className="text-xs mt-0.5 font-mono" style={{ color: '#444' }} title={job.schedule}>{job.schedule}</div>
                 </div>
                 <StatusPill status={job.last_status ?? 'pending'} />
               </div>
@@ -500,7 +631,7 @@ function CronTab({ authToken }) {
                 {[
                   ['Last Run', relTime(job.last_run)],
                   ['Next Run', absTime(job.next_run)],
-                  ['Duration', job.last_duration_ms != null ? `${job.last_duration_ms}ms` : '—'],
+                  ['Duration', fmtDuration(job.last_duration_ms)],
                   ['Errors', job.consecutive_errors > 0 ? `${job.consecutive_errors} consecutive` : '0'],
                 ].map(([label, val]) => (
                   <div key={label}>
@@ -511,8 +642,8 @@ function CronTab({ authToken }) {
               </div>
 
               {job.last_error && (
-                <div className="mt-2 text-xs px-2 py-1.5 rounded font-mono" style={{ background: '#E0525210', color: '#E05252', border: '1px solid #E0525230' }}>
-                  {job.last_error}
+                <div className="mt-2 text-xs px-2 py-1.5 rounded" style={{ background: '#E0525210', color: '#E05252', border: '1px solid #E0525230' }}>
+                  {translateCronError(job.last_error)}
                 </div>
               )}
             </div>
@@ -605,9 +736,9 @@ function ToolActionRow({ action }) {
       <Icon size={12} color={iconColor} className={action.status === 'running' ? 'animate-pulse mt-0.5' : 'mt-0.5'} style={{ flexShrink: 0 }} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono" style={{ color: '#DDD' }}>{action.summary}</span>
+          <span className="text-xs" style={{ color: '#DDD' }}>{humanSummary(action.summary)}</span>
           {action.duration_ms != null && (
-            <span className="text-xs" style={{ color: '#555' }}>{action.duration_ms}ms</span>
+            <span className="text-xs" style={{ color: '#555' }}>{fmtDuration(action.duration_ms)}</span>
           )}
         </div>
         {action.result_preview && (
@@ -640,9 +771,9 @@ function AgentNode({ agent, depth = 0 }) {
           <div className="flex items-center gap-2 px-3 py-2.5 cursor-pointer" onClick={() => setExpanded(e => !e)}>
             <div className="w-2 h-2 rounded-full flex-shrink-0"
               style={{ background: agent.status === 'active' ? '#E8472A' : '#444', boxShadow: agent.status === 'active' ? '0 0 6px #E8472A80' : 'none' }} />
-            <span className="text-xs font-mono flex-1" style={{ color: '#DDD' }}>{agent.key}</span>
+            <span className="text-xs font-semibold flex-1" style={{ color: '#DDD' }}>{sessionLabel(agent.key).label}</span>
             <StatusPill status={agent.status} />
-            {agent.model && <span className="text-xs hidden md:block" style={{ color: '#555' }}>{agent.model}</span>}
+            {agent.model && <span className="text-xs hidden md:block" style={{ color: '#555' }}>{modelLabel(agent.model)}</span>}
             <span className="text-xs" style={{ color: '#444' }}>{relTime(agent.last_activity)}</span>
             {(hasActions || hasChildren) && (
               <ChevronDown size={12} color="#555" style={{ transform: expanded ? 'rotate(0)' : 'rotate(-90deg)', transition: 'transform 0.15s' }} />
@@ -652,7 +783,7 @@ function AgentNode({ agent, depth = 0 }) {
           {/* Task description */}
           {expanded && agent.current_task && (
             <div className="px-3 pb-2 text-xs" style={{ color: '#777', borderTop: '1px solid #222' }}>
-              <span style={{ color: '#555' }}>Task: </span>{agent.current_task}
+              <span style={{ color: '#555' }}>Task: </span>{stripTimestamp(agent.current_task)}
             </div>
           )}
 
