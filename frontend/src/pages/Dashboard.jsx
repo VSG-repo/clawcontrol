@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
-import { useWebSocket } from '@/hooks/useWebSocket'
 import StatusPanel from '@/components/StatusPanel'
 import HealthProbe from '@/components/HealthProbe'
 import ModelPanel from '@/components/ModelPanel'
@@ -9,8 +8,6 @@ import CreditPanel from '@/components/CreditPanel'
 import StatCard from '@/components/StatCard'
 
 export default function Dashboard() {
-  useWebSocket()
-
   const { hardware, credits, wsConnected, wsRetryCount } = useWagzStore()
 
   return (

@@ -13,7 +13,32 @@
       "Bash(ss:*)",
       "Bash(echo:*)",
       "Bash(grep:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(./start.sh:*)",
+      "Bash(ls -la ~/.openclaw/devices/ 2>/dev/null && echo \"---\" && find ~/.openclaw/devices -type f | xargs ls -la 2>/dev/null)",
+      "Bash(ls -la ~/.openclaw/identity/ && find ~/.openclaw/identity -type f | xargs ls -la 2>/dev/null)",
+      "Bash(find ~/.openclaw -maxdepth 2 -name \"*.json\" ! -path \"*/browser/*\" ! -path \"*/devices/*\" | xargs ls -la 2>/dev/null)",
+      "Bash(systemctl:*)",
+      "Bash(openclaw status:*)",
+      "Bash(openclaw devices:*)",
+      "Bash(journalctl:*)",
+      "Bash(openclaw channels status 2>&1 && echo \"===\" && openclaw devices list 2>&1)",
+      "Bash(openclaw channels:*)",
+      "Bash(openclaw models:*)",
+      "Bash(find ~/.openclaw -name \"auth-profiles*\" -o -name \"auth_profiles*\" 2>/dev/null | xargs ls -la 2>/dev/null)",
+      "Bash(openclaw config:*)",
+      "Bash(openclaw doctor:*)",
+      "Bash(openclaw update:*)",
+      "Bash(sleep 5 && openclaw gateway status 2>&1 && echo \"===\" && openclaw --version 2>&1)",
+      "Bash(openclaw sessions --json 2>&1 | head -60 && echo \"===\" && openclaw cron list --help 2>&1)",
+      "Bash(openclaw cron list --json 2>&1 | head -80 && echo \"===\" && openclaw cron runs --help 2>&1)",
+      "Bash(git:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(gh auth:*)",
+      "Bash(ssh-add ~/.ssh/id_ed25519 && git -C /home/wagz/wagz-dashboard push 2>&1)",
+      "Bash(ssh:*)",
+      "Bash(pkill:*)",
+      "Bash(fuser:*)"
     ]
   }
 }

@@ -21,7 +21,7 @@ OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
 PROVIDERS = {
     "openrouter": {
         "name":         "OpenRouter",
-        "key_prefix":   "sk-or-",
+        "key_prefix":   "",
         "validate_url": "https://openrouter.ai/api/v1/auth/key",
     },
     "openai": {
@@ -116,29 +116,31 @@ def _check_key_health(provider: str, key: str) -> str:
     if not info:
         return "unknown"
 
+    validate_url = info.get("validate_url")
+
+    if validate_url:
+        # Try live validation first — prefix is irrelevant here
+        try:
+            resp = httpx.get(
+                validate_url,
+                headers={"Authorization": f"Bearer {key}"},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                return "valid"
+            if resp.status_code == 429:
+                return "rate_limited"
+            if resp.status_code in (401, 403):
+                return "invalid"
+            return "unknown"
+        except Exception:
+            return "unknown"
+
+    # No validate_url — fall back to prefix format check
     prefix = info["key_prefix"]
     if prefix and not key.startswith(prefix):
         return "invalid_format"
-
-    validate_url = info.get("validate_url")
-    if not validate_url:
-        return "valid"  # Format check passed — assume valid
-
-    try:
-        resp = httpx.get(
-            validate_url,
-            headers={"Authorization": f"Bearer {key}"},
-            timeout=10,
-        )
-        if resp.status_code == 200:
-            return "valid"
-        if resp.status_code == 429:
-            return "rate_limited"
-        if resp.status_code in (401, 403):
-            return "invalid"
-        return "unknown"
-    except Exception:
-        return "unknown"
+    return "valid"
 
 
 def _get_keys(config: dict) -> dict:

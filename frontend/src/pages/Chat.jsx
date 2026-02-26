@@ -204,7 +204,7 @@ export default function Chat() {
 
   const [models, setModels] = useState([])
   const [artifactOpen, setArtifactOpen] = useState(true)
-  const [splitPct, setSplitPct] = useState(55)
+  const [splitPct, setSplitPct] = useState(80)
 
   // Scroll management
   const scrollRef = useRef(null)

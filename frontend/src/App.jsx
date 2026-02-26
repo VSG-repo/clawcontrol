@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
+import { useWebSocket } from '@/hooks/useWebSocket'
 import Layout from '@/components/Layout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
@@ -10,6 +11,7 @@ import Routing from '@/pages/Routing'
 import Keys from '@/pages/Keys'
 
 function ProtectedApp() {
+  useWebSocket()
   return (
     <Layout>
       <Routes>
