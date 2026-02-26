@@ -90,7 +90,7 @@ export default function Layout({ children }) {
           {!collapsed && (
             <span
               className="font-bold truncate"
-              style={{ minWidth: 0, fontSize: '14px', letterSpacing: '-0.01em', color: '#E8472A' }}
+              style={{ minWidth: 0, fontSize: '16px', letterSpacing: '-0.01em', color: '#E8472A' }}
             >
               ClawControl
             </span>
@@ -127,7 +127,7 @@ export default function Layout({ children }) {
                     title={label}
                   >
                     <Icon size={16} className="flex-shrink-0" />
-                    {!collapsed && <span className="text-sm truncate">{label}</span>}
+                    {!collapsed && <span className="text-base truncate">{label}</span>}
                   </div>
                 )
               }
@@ -142,7 +142,7 @@ export default function Layout({ children }) {
                     >
                       <NavLink
                         to={to}
-                        className="flex items-center gap-2.5 px-2 py-2 text-sm flex-1 min-w-0"
+                        className="flex items-center gap-2.5 px-2 py-2 text-base flex-1 min-w-0"
                         style={{ color: isChatRoute ? '#FFFFFF' : '#666666', fontWeight: isChatRoute ? 500 : 400 }}
                         title={label}
                         onMouseEnter={(e) => { if (!isChatRoute) e.currentTarget.style.color = '#FFF' }}
@@ -361,7 +361,7 @@ export default function Layout({ children }) {
                   to={to}
                   end={to === '/'}
                   className={({ isActive }) =>
-                    `flex items-center gap-2.5 px-2 py-2 rounded-md text-sm transition-colors ${
+                    `flex items-center gap-2.5 px-2 py-2 rounded-md text-base transition-colors ${
                       isActive ? 'text-white font-medium' : 'hover:text-white'
                     }`
                   }
