@@ -75,6 +75,21 @@ export default function Routing() {
     }
   }
 
+  const loadHeartbeat = async () => {
+    if (!authToken) return
+    try {
+      const r = await fetch('/api/heartbeat', {
+        headers: { Authorization: `Bearer ${authToken}` },
+      })
+      if (!r.ok) return
+      const data = await r.json()
+      setHeartbeatEnabled(Boolean(data.enabled))
+      setHeartbeatInterval(Number(data.interval_seconds) || 300)
+    } catch {
+      // no-op, keep defaults
+    }
+  }
+
   const loadModelHealth = async () => {
     if (!authToken) return
     try {
@@ -93,6 +108,7 @@ export default function Routing() {
   useEffect(() => {
     load()
     loadModelHealth()
+    loadHeartbeat()
   }, [authToken]) // eslint-disable-line
 
   useEffect(() => {
