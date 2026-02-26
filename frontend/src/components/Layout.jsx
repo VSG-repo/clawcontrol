@@ -4,7 +4,7 @@ import { useWagzStore } from '@/store/useWagzStore'
 import {
   Activity, MessageSquare, Cpu, Key, Image,
   BookOpen, Rss, ScrollText, LogOut, Wifi, WifiOff, ChevronLeft, ChevronRight,
-  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2,
+  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard,
 } from 'lucide-react'
 import NotificationPanel from '@/components/NotificationPanel'
 import ClawControlLogo from '@/components/ClawControlLogo'
@@ -20,7 +20,8 @@ function formatAgo(isoString) {
 }
 
 const NAV = [
-  { to: '/', label: 'Status', icon: Activity },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/status', label: 'Status', icon: Activity },
   { to: '/logs', label: 'Logs', icon: ScrollText },
   { to: '/chat', label: 'Chat', icon: MessageSquare },
   { to: '/routing', label: 'Routing', icon: Cpu },

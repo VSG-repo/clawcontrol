@@ -4,6 +4,7 @@ import { useWagzStore } from '@/store/useWagzStore'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import Layout from '@/components/Layout'
 import Login from '@/pages/Login'
+import Overview from '@/pages/Overview'
 import Dashboard from '@/pages/Dashboard'
 import Logs from '@/pages/Logs'
 import Chat from '@/pages/Chat'
@@ -15,7 +16,8 @@ function ProtectedApp() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Overview />} />
+        <Route path="/status" element={<Dashboard />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/routing" element={<Routing />} />
