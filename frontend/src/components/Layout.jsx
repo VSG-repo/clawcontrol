@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
-  Activity, MessageSquare, Cpu, Key, Image,
+  Activity, MessageSquare, Cpu, Key, Puzzle,
   BookOpen, Rss, ScrollText, LogOut, Wifi, WifiOff, ChevronLeft, ChevronRight,
   Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard,
 } from 'lucide-react'
@@ -26,7 +26,7 @@ const NAV = [
   { to: '/chat', label: 'Chat', icon: MessageSquare },
   { to: '/routing', label: 'Routing', icon: Cpu },
   { to: '/keys', label: 'Keys', icon: Key },
-  { to: '/media', label: 'Media', icon: Image, disabled: true },
+  { to: '/skills', label: 'Skills', icon: Puzzle },
   { to: '/prompts', label: 'Prompts', icon: BookOpen, disabled: true },
   { to: '/news', label: 'News', icon: Rss, disabled: true },
 ]

@@ -28,6 +28,7 @@ import routers.chat as chat_router
 import routers.routing as routing_router
 import routers.observe as observe_router
 import routers.keys as keys_router
+import routers.skills as skills_router
 
 
 @asynccontextmanager
@@ -71,6 +72,7 @@ app.include_router(chat_router.router)
 app.include_router(routing_router.router)
 app.include_router(observe_router.router)
 app.include_router(keys_router.router)
+app.include_router(skills_router.router)
 
 
 # Auth endpoints

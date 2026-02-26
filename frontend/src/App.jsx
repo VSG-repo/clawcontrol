@@ -10,6 +10,7 @@ import Logs from '@/pages/Logs'
 import Chat from '@/pages/Chat'
 import Routing from '@/pages/Routing'
 import Keys from '@/pages/Keys'
+import Skills from '@/pages/Skills'
 
 function ProtectedApp() {
   useWebSocket()
@@ -22,6 +23,7 @@ function ProtectedApp() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/routing" element={<Routing />} />
         <Route path="/keys" element={<Keys />} />
+        <Route path="/skills" element={<Skills />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
