@@ -21,7 +21,7 @@ function LevelBadge({ level }) {
   const cfg = LEVEL[level] ?? LEVEL.INFO
   return (
     <span
-      className="inline-block text-xs px-1.5 py-0.5 rounded font-mono font-bold flex-shrink-0"
+      className="inline-block text-sm px-1.5 py-0.5 rounded font-mono font-bold flex-shrink-0"
       style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`, minWidth: '46px', textAlign: 'center' }}
     >
       {level}
@@ -32,7 +32,7 @@ function LevelBadge({ level }) {
 function SourceBadge({ source }) {
   return (
     <span
-      className="inline-block text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+      className="inline-block text-sm px-1.5 py-0.5 rounded flex-shrink-0"
       style={{
         background: source === 'audit' ? '#7C6FCD20' : '#E8472A15',
         color: source === 'audit' ? '#7C6FCD' : '#E8472A',
@@ -67,7 +67,7 @@ function LogRow({ entry, search }) {
 
   return (
     <div
-      className="flex items-start gap-2 px-3 py-1.5 border-b font-mono text-xs hover:bg-white/5 transition-colors"
+      className="flex items-start gap-2 px-3 py-1.5 border-b font-mono text-sm hover:bg-white/5 transition-colors"
       style={{ borderColor: '#1A1A1A', background: entry.level === 'ERROR' ? '#E0525208' : 'transparent' }}
     >
       <div className="flex-shrink-0 text-right" style={{ color: '#444', minWidth: '100px' }}>
@@ -170,16 +170,16 @@ function LogsTab({ authToken }) {
       <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <div className="flex items-center gap-2">
           {errorCount > 0 && (
-            <span className="text-xs px-2 py-1 rounded" style={{ background: '#E0525215', color: '#E05252', border: '1px solid #E0525240' }}>
+            <span className="text-sm px-2 py-1 rounded" style={{ background: '#E0525215', color: '#E05252', border: '1px solid #E0525240' }}>
               {errorCount} error{errorCount !== 1 ? 's' : ''}
             </span>
           )}
           {warnCount > 0 && (
-            <span className="text-xs px-2 py-1 rounded" style={{ background: '#E0A02015', color: '#E0A020', border: '1px solid #E0A02040' }}>
+            <span className="text-sm px-2 py-1 rounded" style={{ background: '#E0A02015', color: '#E0A020', border: '1px solid #E0A02040' }}>
               {warnCount} warn{warnCount !== 1 ? 's' : ''}
             </span>
           )}
-          <span className="text-xs" style={{ color: '#555' }}>{total} entries</span>
+          <span className="text-sm" style={{ color: '#555' }}>{total} entries</span>
         </div>
       </div>
 
@@ -192,12 +192,12 @@ function LogsTab({ authToken }) {
             placeholder="Search logs…"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            className="flex-1 bg-transparent text-xs outline-none text-white placeholder-gray-600"
+            className="flex-1 bg-transparent text-sm outline-none text-white placeholder-gray-600"
           />
         </div>
         <div className="flex gap-1">
           {['ALL', 'INFO', 'WARN', 'ERROR'].map(l => (
-            <button key={l} onClick={() => setLevel(l)} className="text-xs px-2.5 py-1.5 rounded font-medium transition-colors"
+            <button key={l} onClick={() => setLevel(l)} className="text-sm px-2.5 py-1.5 rounded font-medium transition-colors"
               style={{ background: level === l ? (l === 'ERROR' ? '#E05252' : l === 'WARN' ? '#E0A020' : '#E8472A') : '#1A1A1A', color: level === l ? '#fff' : '#666', border: `1px solid ${level === l ? 'transparent' : '#2A2A2A'}` }}>
               {l}
             </button>
@@ -205,20 +205,20 @@ function LogsTab({ authToken }) {
         </div>
         <div className="flex gap-1">
           {TIME_RANGES.map(r => (
-            <button key={r.label} onClick={() => setTimeRange(r)} className="text-xs px-2 py-1.5 rounded transition-colors"
+            <button key={r.label} onClick={() => setTimeRange(r)} className="text-sm px-2 py-1.5 rounded transition-colors"
               style={{ background: timeRange.label === r.label ? '#E8472A20' : '#1A1A1A', color: timeRange.label === r.label ? '#E8472A' : '#666', border: `1px solid ${timeRange.label === r.label ? '#E8472A40' : '#2A2A2A'}` }}>
               {r.label}
             </button>
           ))}
         </div>
         {['gateway', 'audit'].map(src => (
-          <button key={src} onClick={() => setSources(s => ({ ...s, [src]: !s[src] }))} className="text-xs px-2 py-1.5 rounded transition-colors"
+          <button key={src} onClick={() => setSources(s => ({ ...s, [src]: !s[src] }))} className="text-sm px-2 py-1.5 rounded transition-colors"
             style={{ background: sources[src] ? (src === 'audit' ? '#7C6FCD20' : '#E8472A15') : '#1A1A1A', color: sources[src] ? (src === 'audit' ? '#7C6FCD' : '#E8472A') : '#555', border: `1px solid ${sources[src] ? (src === 'audit' ? '#7C6FCD40' : '#E8472A40') : '#2A2A2A'}` }}>
             {src}
           </button>
         ))}
         <div className="flex items-center gap-1 ml-auto">
-          <button onClick={() => setLiveMode(l => !l)} className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded transition-colors"
+          <button onClick={() => setLiveMode(l => !l)} className="flex items-center gap-1.5 text-sm px-2.5 py-1.5 rounded transition-colors"
             style={{ background: liveMode ? '#E8472A15' : '#1A1A1A', color: liveMode ? '#E8472A' : '#555', border: `1px solid ${liveMode ? '#E8472A40' : '#2A2A2A'}` }}>
             <div className={`w-1.5 h-1.5 rounded-full ${liveMode ? 'animate-pulse' : ''}`} style={{ background: liveMode ? '#E8472A' : '#444' }} />
             {liveMode ? 'Live' : 'Paused'}
@@ -236,14 +236,14 @@ function LogsTab({ authToken }) {
       <div className="flex-1 overflow-y-auto rounded-md relative" style={{ background: '#111', border: '1px solid #1E1E1E', minHeight: 0 }}
         ref={listRef} onScroll={onScroll}
         onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
-        <div className="sticky top-0 flex items-center gap-2 px-3 py-1.5 font-mono text-xs border-b z-10"
+        <div className="sticky top-0 flex items-center gap-2 px-3 py-1.5 font-mono text-sm border-b z-10"
           style={{ background: '#0D0D0D', borderColor: '#1E1E1E', color: '#444' }}>
           <span style={{ minWidth: '100px' }}>Time</span>
           <span style={{ minWidth: '46px' }}>Level</span>
           <span style={{ minWidth: '54px' }}>Source</span>
           <span>Message</span>
           {isPaused && (
-            <span className="ml-auto flex items-center gap-1 text-xs" style={{ color: '#E0A020' }}>
+            <span className="ml-auto flex items-center gap-1 text-sm" style={{ color: '#E0A020' }}>
               <Pause size={10} /> Paused
             </span>
           )}
@@ -256,12 +256,12 @@ function LogsTab({ authToken }) {
       </div>
 
       <div className="flex items-center justify-between mt-2 flex-shrink-0">
-        <span className="text-xs" style={{ color: '#444' }}>
+        <span className="text-sm" style={{ color: '#444' }}>
           Showing {logs.length} of {total} entries · {timeRange.label} window
         </span>
         {!atBottomRef.current && (
           <button onClick={() => { listRef.current.scrollTop = listRef.current.scrollHeight; atBottomRef.current = true }}
-            className="text-xs px-2 py-1 rounded" style={{ background: '#E8472A20', color: '#E8472A', border: '1px solid #E8472A40' }}>
+            className="text-sm px-2 py-1 rounded" style={{ background: '#E8472A20', color: '#E8472A', border: '1px solid #E8472A40' }}>
             ↓ Scroll to bottom
           </button>
         )}
@@ -351,14 +351,14 @@ function SearchBox({ value, onChange, placeholder }) {
     <div className="flex items-center gap-2 flex-1 min-w-48 px-3 py-2 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
       <Search size={13} color="#666" />
       <input type="text" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)}
-        className="flex-1 bg-transparent text-xs outline-none text-white placeholder-gray-600" />
+        className="flex-1 bg-transparent text-sm outline-none text-white placeholder-gray-600" />
     </div>
   )
 }
 
 function RefreshBtn({ onClick, loading, label }) {
   return (
-    <button onClick={onClick} disabled={loading} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded transition-colors ml-auto"
+    <button onClick={onClick} disabled={loading} className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded transition-colors ml-auto"
       style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#666' }}>
       <RotateCcw size={12} className={loading ? 'animate-spin' : ''} />
       {label ?? 'Refresh'}
@@ -899,8 +899,8 @@ export default function Logs() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold text-white">Observability Hub</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#666' }}>
+          <h1 className="text-xl font-bold text-white">Observability Hub</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#666' }}>
             Phase 2 — Logs · Sessions · Tasks · Queue · Activity
           </p>
         </div>
@@ -914,7 +914,7 @@ export default function Logs() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className="flex items-center gap-1.5 text-xs px-3 py-2 transition-colors relative"
+              className="flex items-center gap-1.5 text-sm px-3 py-2 transition-colors relative"
               style={{ color: active ? '#E8472A' : '#666' }}
             >
               <Icon size={12} />

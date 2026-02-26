@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
   Activity, MessageSquare, Cpu, Key, Puzzle,
-  BookOpen, Rss, ScrollText, LogOut, Wifi, WifiOff, ChevronLeft, ChevronRight,
+  BookOpen, Rss, ScrollText, LogOut, Wifi, WifiOff, Menu,
   Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard,
 } from 'lucide-react'
 import NotificationPanel from '@/components/NotificationPanel'
@@ -90,7 +90,7 @@ export default function Layout({ children }) {
           {!collapsed && (
             <span
               className="font-bold truncate"
-              style={{ minWidth: 0, fontSize: '12px', letterSpacing: '-0.01em', color: '#E8472A' }}
+              style={{ minWidth: 0, fontSize: '14px', letterSpacing: '-0.01em', color: '#E8472A' }}
             >
               ClawControl
             </span>
@@ -110,7 +110,7 @@ export default function Layout({ children }) {
             onMouseLeave={(e) => { e.currentTarget.style.color = '#444'; e.currentTarget.style.background = 'transparent' }}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+            <Menu size={14} />
           </button>
         </div>
 

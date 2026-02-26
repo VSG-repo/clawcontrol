@@ -208,7 +208,7 @@ export default function Routing() {
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-lg font-bold text-white">Model Routing Controls</h1>
@@ -252,89 +252,139 @@ export default function Routing() {
       )}
 
       <div className="space-y-4">
-        <section className="p-4 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <Cpu size={13} color="#E8472A" />
-            <h2 className="text-sm font-semibold text-white">Primary Model</h2>
-          </div>
 
-          <select
-            value={primaryModelId}
-            onChange={(e) => setPrimaryModelId(e.target.value)}
-            className="w-full text-sm px-3 py-2 rounded-md"
-            style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
-          >
-            <option value="">Select primary model</option>
-            {orderedModels.map((m) => (
-              <option key={m.model_id} value={m.model_id}>
-                {modelLabel(m.model_id, orderedModels)}
-              </option>
-            ))}
-          </select>
-        </section>
+        {/* Row 1: Primary Model + Fallback Models */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="p-4 rounded-md h-full" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Cpu size={13} color="#E8472A" />
+              <h2 className="text-sm font-semibold text-white">Primary Model</h2>
+            </div>
 
-        <section className="p-4 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-          <h2 className="text-sm font-semibold text-white mb-3">Fallback Models</h2>
-          <div className="space-y-2">
-            {fallbackOptions.map((m) => {
-              const checked = fallbackModelIds.includes(m.model_id)
-              return (
-                <label
-                  key={m.model_id}
-                  className="flex items-center justify-between gap-3 px-3 py-2 rounded-md cursor-pointer"
-                  style={{ background: '#111', border: '1px solid #222' }}
-                >
-                  <span className="text-xs" style={{ color: '#DDD' }}>{modelLabel(m.model_id, orderedModels)}</span>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggleFallback(m.model_id)}
-                  />
-                </label>
-              )
-            })}
-          </div>
-        </section>
-
-        <section className="p-4 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-          <h2 className="text-sm font-semibold text-white mb-3">Manual Override</h2>
-
-          <label className="flex items-center gap-2 mb-3 text-xs" style={{ color: '#DDD' }}>
-            <input
-              type="checkbox"
-              checked={overrideEnabled}
-              onChange={(e) => setOverrideEnabled(e.target.checked)}
-            />
-            Enable manual override
-          </label>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <select
-              value={overrideModelId}
-              onChange={(e) => setOverrideModelId(e.target.value)}
-              className="text-sm px-3 py-2 rounded-md"
+              value={primaryModelId}
+              onChange={(e) => setPrimaryModelId(e.target.value)}
+              className="w-full text-sm px-3 py-2 rounded-md"
               style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
             >
-              <option value="">Select override model</option>
+              <option value="">Select primary model</option>
               {orderedModels.map((m) => (
                 <option key={m.model_id} value={m.model_id}>
                   {modelLabel(m.model_id, orderedModels)}
                 </option>
               ))}
             </select>
+          </section>
 
-            <input
-              type="number"
-              min="0"
-              value={overrideRequests}
-              onChange={(e) => setOverrideRequests(e.target.value)}
-              className="text-sm px-3 py-2 rounded-md"
-              style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
-              placeholder="Requests remaining"
-            />
-          </div>
-        </section>
+          <section className="p-4 rounded-md h-full" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+            <h2 className="text-sm font-semibold text-white mb-3">Fallback Models</h2>
+            <div className="space-y-2">
+              {fallbackOptions.map((m) => {
+                const checked = fallbackModelIds.includes(m.model_id)
+                return (
+                  <label
+                    key={m.model_id}
+                    className="flex items-center justify-between gap-3 px-3 py-2 rounded-md cursor-pointer"
+                    style={{ background: '#111', border: '1px solid #222' }}
+                  >
+                    <span className="text-xs" style={{ color: '#DDD' }}>{modelLabel(m.model_id, orderedModels)}</span>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleFallback(m.model_id)}
+                    />
+                  </label>
+                )
+              })}
+            </div>
+          </section>
+        </div>
 
+        {/* Row 2: Manual Override + Heartbeat / Cron Config */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section className="p-4 rounded-md h-full" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+            <h2 className="text-sm font-semibold text-white mb-3">Manual Override</h2>
+
+            <label className="flex items-center gap-2 mb-3 text-xs" style={{ color: '#DDD' }}>
+              <input
+                type="checkbox"
+                checked={overrideEnabled}
+                onChange={(e) => setOverrideEnabled(e.target.checked)}
+              />
+              Enable manual override
+            </label>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <select
+                value={overrideModelId}
+                onChange={(e) => setOverrideModelId(e.target.value)}
+                className="text-sm px-3 py-2 rounded-md"
+                style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
+              >
+                <option value="">Select override model</option>
+                {orderedModels.map((m) => (
+                  <option key={m.model_id} value={m.model_id}>
+                    {modelLabel(m.model_id, orderedModels)}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="number"
+                min="0"
+                value={overrideRequests}
+                onChange={(e) => setOverrideRequests(e.target.value)}
+                className="text-sm px-3 py-2 rounded-md"
+                style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
+                placeholder="Requests remaining"
+              />
+            </div>
+          </section>
+
+          <section className="p-4 rounded-md h-full" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+            <h2 className="text-sm font-semibold text-white mb-3">Heartbeat / Cron Config</h2>
+
+            <label className="flex items-center gap-2 mb-3 text-xs" style={{ color: '#DDD' }}>
+              <input
+                type="checkbox"
+                checked={heartbeatEnabled}
+                onChange={(e) => setHeartbeatEnabled(e.target.checked)}
+              />
+              Heartbeat enabled
+            </label>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <input
+                type="number"
+                min="30"
+                max="1800"
+                value={heartbeatInterval}
+                onChange={(e) => setHeartbeatInterval(e.target.value)}
+                className="text-sm px-3 py-2 rounded-md"
+                style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
+                placeholder="Interval seconds"
+              />
+
+              <button
+                onClick={saveHeartbeat}
+                disabled={heartbeatSaving}
+                className="flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-md"
+                style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#999' }}
+              >
+                <Save size={12} className={heartbeatSaving ? 'animate-pulse' : ''} />
+                Save Heartbeat
+              </button>
+            </div>
+
+            {heartbeatError && (
+              <div className="text-xs px-3 py-2 rounded" style={{ background: '#E0525215', border: '1px solid #E0525240', color: '#E05252' }}>
+                {heartbeatError}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Row 3: Model Health Indicators — full width */}
         <section className="p-4 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
           <div className="flex items-center gap-2 mb-3">
             <Activity size={13} color="#E8472A" />
@@ -365,47 +415,6 @@ export default function Routing() {
           </div>
         </section>
 
-        <section className="p-4 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-          <h2 className="text-sm font-semibold text-white mb-3">Heartbeat / Cron Config</h2>
-
-          <label className="flex items-center gap-2 mb-3 text-xs" style={{ color: '#DDD' }}>
-            <input
-              type="checkbox"
-              checked={heartbeatEnabled}
-              onChange={(e) => setHeartbeatEnabled(e.target.checked)}
-            />
-            Heartbeat enabled
-          </label>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-            <input
-              type="number"
-              min="30"
-              max="1800"
-              value={heartbeatInterval}
-              onChange={(e) => setHeartbeatInterval(e.target.value)}
-              className="text-sm px-3 py-2 rounded-md"
-              style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
-              placeholder="Interval seconds"
-            />
-
-            <button
-              onClick={saveHeartbeat}
-              disabled={heartbeatSaving}
-              className="flex items-center justify-center gap-1.5 text-xs px-3 py-2 rounded-md"
-              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#999' }}
-            >
-              <Save size={12} className={heartbeatSaving ? 'animate-pulse' : ''} />
-              Save Heartbeat
-            </button>
-          </div>
-
-          {heartbeatError && (
-            <div className="text-xs px-3 py-2 rounded" style={{ background: '#E0525215', border: '1px solid #E0525240', color: '#E05252' }}>
-              {heartbeatError}
-            </div>
-          )}
-        </section>
       </div>
     </div>
   )
