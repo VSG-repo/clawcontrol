@@ -58,7 +58,7 @@ function MiniStat({ label, value, sub, accent = false, valueColor }) {
       >
         {value ?? <span style={{ color: '#333' }}>—</span>}
       </span>
-      {sub && <span className="text-xs" style={{ color: '#555' }}>{sub}</span>}
+      {sub && <span className="text-sm" style={{ color: '#555' }}>{sub}</span>}
     </div>
   )
 }
@@ -82,10 +82,10 @@ function LogEntry({ entry }) {
       >
         {entry.level}
       </span>
-      <span className="text-xs flex-shrink-0 mt-0.5 tabular-nums" style={{ color: '#444', minWidth: '68px' }}>
+      <span className="text-sm flex-shrink-0 mt-0.5 tabular-nums" style={{ color: '#444', minWidth: '68px' }}>
         {fmtTs(entry.ts)}
       </span>
-      <span className="text-xs leading-relaxed break-all" style={{ color: '#999' }}>
+      <span className="text-sm leading-relaxed break-all" style={{ color: '#999' }}>
         {entry.message}
       </span>
     </div>
@@ -96,8 +96,8 @@ function QuickGlanceRow({ icon: Icon, label, value, valueColor }) {
   return (
     <div className="flex items-center gap-3 py-2.5" style={{ borderBottom: '1px solid #1A1A1A' }}>
       <Icon size={13} color="#444" className="flex-shrink-0" />
-      <span className="text-xs flex-1" style={{ color: '#555' }}>{label}</span>
-      <span className="text-xs font-medium" style={{ color: valueColor ?? '#CCC' }}>{value ?? '—'}</span>
+      <span className="text-sm flex-1" style={{ color: '#555' }}>{label}</span>
+      <span className="text-sm font-medium" style={{ color: valueColor ?? '#CCC' }}>{value ?? '—'}</span>
     </div>
   )
 }
@@ -158,8 +158,8 @@ export default function Overview() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-bold text-white">Mission Control</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#444' }}>
+          <h1 className="text-xl font-bold text-white">Mission Control</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#444' }}>
             ClawControl — system overview
             {lastFetch && (
               <span className="ml-2" style={{ color: '#333' }}>
@@ -214,7 +214,7 @@ export default function Overview() {
           className="rounded-lg p-4"
           style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
         >
-          <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: '#666' }}>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-1" style={{ color: '#666' }}>
             System Quick Glance
           </p>
 
@@ -226,8 +226,8 @@ export default function Overview() {
               color={gatewayOnline ? '#4CAF50' : '#E05252'}
               className="flex-shrink-0"
             />
-            <span className="text-xs flex-1" style={{ color: '#555' }}>Gateway</span>
-            <span className="text-xs font-medium" style={{ color: gatewayOnline ? '#4CAF50' : '#E05252' }}>
+            <span className="text-sm flex-1" style={{ color: '#555' }}>Gateway</span>
+            <span className="text-sm font-medium" style={{ color: gatewayOnline ? '#4CAF50' : '#E05252' }}>
               {status?.status ?? '—'}
             </span>
           </div>
@@ -265,9 +265,9 @@ export default function Overview() {
                 ? <XCircle size={13} color="#E05252" className="flex-shrink-0" />
                 : <Activity size={13} color="#444" className="flex-shrink-0" />
             }
-            <span className="text-xs flex-1" style={{ color: '#555' }}>Health probe</span>
+            <span className="text-sm flex-1" style={{ color: '#555' }}>Health probe</span>
             <span
-              className="text-xs font-medium"
+              className="text-sm font-medium"
               style={{ color: probe?.result === 'ok' ? '#4CAF50' : probe?.result ? '#E05252' : '#444' }}
             >
               {probe?.result
@@ -283,7 +283,7 @@ export default function Overview() {
           className="rounded-lg p-4"
           style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
         >
-          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#666' }}>
+          <p className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#666' }}>
             Task Queue
           </p>
           <div className="flex flex-col items-center justify-center py-6 gap-2">
@@ -293,8 +293,8 @@ export default function Overview() {
             >
               <CheckCircle2 size={16} color="#2A2A2A" />
             </div>
-            <p className="text-sm" style={{ color: '#333' }}>No active tasks</p>
-            <p className="text-xs text-center" style={{ color: '#2A2A2A' }}>
+            <p className="text-base" style={{ color: '#333' }}>No active tasks</p>
+            <p className="text-sm text-center" style={{ color: '#2A2A2A' }}>
               Task queue integration coming soon
             </p>
           </div>
@@ -311,15 +311,15 @@ export default function Overview() {
           className="flex items-center justify-between px-4 py-3 flex-shrink-0"
           style={{ borderBottom: '1px solid #222' }}
         >
-          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
+          <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
             Recent Activity
           </span>
-          <span className="text-xs" style={{ color: '#333' }}>last 5 entries</span>
+          <span className="text-sm" style={{ color: '#333' }}>last 5 entries</span>
         </div>
 
         <div>
           {logs.length === 0 ? (
-            <div className="flex items-center justify-center h-24 text-xs" style={{ color: '#333' }}>
+            <div className="flex items-center justify-center h-24 text-sm" style={{ color: '#333' }}>
               {loading ? 'Loading…' : 'No log entries found'}
             </div>
           ) : (
@@ -333,7 +333,7 @@ export default function Overview() {
         >
           <button
             onClick={() => navigate('/logs')}
-            className="flex items-center gap-1 text-xs transition-colors"
+            className="flex items-center gap-1 text-sm transition-colors"
             style={{ color: '#E8472A' }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6040')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#E8472A')}
