@@ -93,6 +93,9 @@ import routers.observe as observe_router
 import routers.keys as keys_router
 import routers.skills as skills_router
 import routers.prompts as prompts_router
+import routers.agents as agents_router
+import routers.orders as orders_router
+import routers.cron as cron_router
 
 
 @asynccontextmanager
@@ -138,6 +141,9 @@ app.include_router(observe_router.router)
 app.include_router(keys_router.router)
 app.include_router(skills_router.router)
 app.include_router(prompts_router.router)
+app.include_router(agents_router.router)
+app.include_router(orders_router.router)
+app.include_router(cron_router.router)
 
 
 # Auth endpoints

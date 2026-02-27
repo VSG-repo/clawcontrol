@@ -4,8 +4,8 @@ import { useWagzStore } from '@/store/useWagzStore'
 import { detectAlerts } from '@/services/alertDetector'
 import {
   Activity, MessageSquare, Cpu, Key, Puzzle,
-  BookOpen, Rss, ScrollText, LogOut, Wifi, WifiOff, Menu,
-  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard, Bell,
+  BookOpen, ScrollText, LogOut, Wifi, WifiOff, Menu,
+  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard, Bell, Bot,
 } from 'lucide-react'
 import NotificationPanel from '@/components/NotificationPanel'
 import ClawControlLogo from '@/components/ClawControlLogo'
@@ -29,7 +29,7 @@ const NAV = [
   { to: '/keys', label: 'Keys', icon: Key },
   { to: '/skills', label: 'Skills', icon: Puzzle },
   { to: '/prompts', label: 'Prompts', icon: BookOpen },
-  { to: '/news', label: 'News', icon: Rss, disabled: true },
+  { to: '/agents', label: 'Agents', icon: Bot },
   { to: '/alerts', label: 'Alerts', icon: Bell },
 ]
 
