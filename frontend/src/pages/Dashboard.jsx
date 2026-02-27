@@ -15,9 +15,9 @@ export default function Dashboard() {
       {/* Page title */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-bold text-white">System Status</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#666' }}>
-            Phase 1 — Health Monitoring
+          <h1 className="text-2xl font-bold text-white">System Status</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#999' }}>
+            Health Monitoring
           </p>
         </div>
         {!wsConnected && wsRetryCount > 0 && (

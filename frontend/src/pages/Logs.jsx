@@ -899,9 +899,9 @@ export default function Logs() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div>
-          <h1 className="text-xl font-bold text-white">Observability Hub</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#666' }}>
-            Phase 2 — Logs · Sessions · Tasks · Queue · Activity
+          <h1 className="text-2xl font-bold text-white">Observability Hub</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#999' }}>
+            Logs · Sessions · Tasks · Queue · Activity
           </p>
         </div>
       </div>

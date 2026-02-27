@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
+import { detectAlerts } from '@/services/alertDetector'
 import {
   Activity, MessageSquare, Cpu, Key, Puzzle,
   BookOpen, Rss, ScrollText, LogOut, Wifi, WifiOff, Menu,
-  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard,
+  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard, Bell,
 } from 'lucide-react'
 import NotificationPanel from '@/components/NotificationPanel'
 import ClawControlLogo from '@/components/ClawControlLogo'
@@ -29,10 +30,17 @@ const NAV = [
   { to: '/skills', label: 'Skills', icon: Puzzle },
   { to: '/prompts', label: 'Prompts', icon: BookOpen },
   { to: '/news', label: 'News', icon: Rss, disabled: true },
+  { to: '/alerts', label: 'Alerts', icon: Bell },
 ]
 
+const DISMISSED_KEY = 'clawcontrol_dismissed_alerts'
+function loadDismissed() {
+  try { return new Set(JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]')) }
+  catch { return new Set() }
+}
+
 export default function Layout({ children }) {
-  const { wsConnected, clearAuth } = useWagzStore()
+  const { wsConnected, clearAuth, authToken } = useWagzStore()
   const location = useLocation()
   const isChatRoute = location.pathname === '/chat'
 
@@ -50,7 +58,23 @@ export default function Layout({ children }) {
   const [menuOpenId, setMenuOpenId] = useState(null)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
   const [renamingId, setRenamingId] = useState(null)
+  const [alertCount, setAlertCount] = useState(0)
   const [renameValue, setRenameValue] = useState('')
+
+  const refreshAlertCount = useCallback(async () => {
+    if (!authToken) return
+    try {
+      const alerts = await detectAlerts(authToken)
+      const dismissed = loadDismissed()
+      setAlertCount(alerts.filter((a) => !dismissed.has(a.id)).length)
+    } catch { /* silent — badge just stays at previous value */ }
+  }, [authToken])
+
+  useEffect(() => {
+    refreshAlertCount()
+    const id = setInterval(refreshAlertCount, 60000)
+    return () => clearInterval(id)
+  }, [refreshAlertCount])
 
   useEffect(() => {
     localStorage.setItem('sidebar_collapsed', collapsed)
@@ -355,6 +379,7 @@ export default function Layout({ children }) {
               }
 
               // All other enabled nav items
+              const badge = to === '/alerts' && alertCount > 0 ? alertCount : null
               return (
                 <NavLink
                   key={to}
@@ -372,8 +397,26 @@ export default function Layout({ children }) {
                   })}
                   title={label}
                 >
-                  <Icon size={16} className="flex-shrink-0" />
-                  {!collapsed && <span className="truncate">{label}</span>}
+                  <div className="relative flex-shrink-0">
+                    <Icon size={16} />
+                    {badge && collapsed && (
+                      <span
+                        className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-white"
+                        style={{ background: '#E05252', fontSize: '9px', minWidth: '14px', height: '14px', padding: '0 3px' }}
+                      >
+                        {badge}
+                      </span>
+                    )}
+                  </div>
+                  {!collapsed && <span className="truncate flex-1">{label}</span>}
+                  {!collapsed && badge && (
+                    <span
+                      className="flex-shrink-0 flex items-center justify-center rounded-full text-white ml-auto"
+                      style={{ background: '#E05252', fontSize: '10px', minWidth: '18px', height: '18px', padding: '0 4px' }}
+                    >
+                      {badge}
+                    </span>
+                  )}
                 </NavLink>
               )
             })}
@@ -414,9 +457,6 @@ export default function Layout({ children }) {
             )}
           </div>
 
-          {/* Notification bell */}
-          <NotificationPanel collapsed={collapsed} />
-
           {/* Logout */}
           <button
             onClick={handleLogout}
@@ -436,7 +476,7 @@ export default function Layout({ children }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto min-w-0">
+      <main className="flex-1 overflow-y-auto min-w-0" style={{ background: '#0D0D0D' }}>
         {children}
       </main>
     </div>

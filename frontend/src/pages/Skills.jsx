@@ -152,9 +152,9 @@ export default function Skills() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-white">Skills Manager</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#555' }}>
-            Phase 6 — Browse loaded skills and find new ones
+          <h1 className="text-2xl font-bold text-white">Skills Manager</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#999' }}>
+            Browse loaded skills and find new ones
           </p>
         </div>
         <button

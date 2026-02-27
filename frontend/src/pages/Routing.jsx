@@ -211,9 +211,9 @@ export default function Routing() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-lg font-bold text-white">Model Routing Controls</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#666' }}>
-            Phase 4 — Primary, fallback chain, and manual override
+          <h1 className="text-2xl font-bold text-white">Model Routing Controls</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#999' }}>
+            Primary, fallback chain, and manual override
           </p>
         </div>
 

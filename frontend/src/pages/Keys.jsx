@@ -227,9 +227,9 @@ export default function Keys() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-lg font-bold text-white">Credentials & Keys</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#666' }}>
-            Phase 5 — API keys, health checks, and cost circuit breaker
+          <h1 className="text-2xl font-bold text-white">Credentials & Keys</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#999' }}>
+            API keys, health checks, and cost circuit breaker
           </p>
         </div>
         <div className="flex items-center gap-2">

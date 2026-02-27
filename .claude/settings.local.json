@@ -38,7 +38,9 @@
       "Bash(ssh-add ~/.ssh/id_ed25519 && git -C /home/wagz/wagz-dashboard push 2>&1)",
       "Bash(ssh:*)",
       "Bash(pkill:*)",
-      "Bash(fuser:*)"
+      "Bash(fuser:*)",
+      "Bash(pgrep:*)",
+      "Bash(lsof:*)"
     ]
   }
 }

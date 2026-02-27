@@ -158,8 +158,8 @@ export default function Overview() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-white">Mission Control</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#444' }}>
+          <h1 className="text-2xl font-bold text-white">Mission Control</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#999' }}>
             ClawControl — system overview
             {lastFetch && (
               <span className="ml-2" style={{ color: '#333' }}>

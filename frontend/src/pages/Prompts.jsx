@@ -65,6 +65,54 @@ function Toast({ msg, onDone }) {
   )
 }
 
+// ── Help Box ──────────────────────────────────────────────────────────────────
+
+const HELP_CONTENT = {
+  prompts: {
+    heading: '📋 Prompts',
+    intro: 'Save reusable prompts you send to your agent regularly.',
+    bullets: [
+      "Click '+ New Prompt' to create one",
+      "Use {{variable_name}} for dynamic parts (e.g. 'Research {{topic}} in {{format}} format')",
+      'Variables auto-detect and show as orange pills',
+      "'Fill & Send' lets you fill in variables then sends to Chat",
+      "'Send Raw' sends the prompt as-is with the {{brackets}} included",
+      'Use categories to organize: Coding, Research, Media, etc.',
+    ],
+  },
+  templates: {
+    heading: '📄 Templates',
+    intro: 'Create and export .md files like SKILL.md, README.md, or system prompts.',
+    bullets: [
+      "Click 'From Starter' to begin with a pre-built template",
+      'Edit the content, then Export to save directly to your OpenClaw workspace',
+      'Or Download as a .md file to your computer',
+      'Great for creating skills, documentation, and agent configs',
+    ],
+  },
+}
+
+function HelpBox({ tab }) {
+  const content = HELP_CONTENT[tab] || HELP_CONTENT.prompts
+  return (
+    <div
+      className="mb-5 rounded-md px-4 py-3"
+      style={{ background: '#141414', border: '1px solid #252525' }}
+    >
+      <p className="text-sm font-semibold mb-1" style={{ color: '#CCC' }}>{content.heading}</p>
+      <p className="text-base mb-2" style={{ color: '#BBB' }}>{content.intro}</p>
+      <ul className="space-y-1">
+        {content.bullets.map((b, i) => (
+          <li key={i} className="text-base flex gap-2" style={{ color: '#BBB' }}>
+            <span style={{ color: '#666', flexShrink: 0 }}>•</span>
+            <span>{b}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 // ── Prompts Tab ───────────────────────────────────────────────────────────────
 
 function PromptsTab({ authToken, toast }) {
@@ -849,18 +897,19 @@ export default function Prompts() {
   const { authToken } = useWagzStore()
   const [tab, setTab] = useState('prompts')
   const [toastMsg, setToastMsg] = useState(null)
-
   const toast = (msg) => setToastMsg(msg)
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Page header */}
       <div className="mb-5">
-        <h1 className="text-xl font-bold text-white">Prompts &amp; Templates</h1>
-        <p className="text-sm mt-0.5" style={{ color: '#666' }}>
-          Phase 7 — Reusable prompts and markdown templates
+        <h1 className="text-2xl font-bold text-white">Prompts &amp; Templates</h1>
+        <p className="text-sm mt-0.5" style={{ color: '#999' }}>
+          Reusable prompts and markdown templates
         </p>
       </div>
+
+      <HelpBox tab={tab} />
 
       {/* Tab switcher */}
       <div className="flex gap-1 mb-5 p-1 rounded-md w-fit" style={{ background: '#111', border: '1px solid #1E1E1E' }}>
