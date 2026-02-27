@@ -27,7 +27,7 @@ const NAV = [
   { to: '/routing', label: 'Routing', icon: Cpu },
   { to: '/keys', label: 'Keys', icon: Key },
   { to: '/skills', label: 'Skills', icon: Puzzle },
-  { to: '/prompts', label: 'Prompts', icon: BookOpen, disabled: true },
+  { to: '/prompts', label: 'Prompts', icon: BookOpen },
   { to: '/news', label: 'News', icon: Rss, disabled: true },
 ]
 

@@ -92,6 +92,7 @@ import routers.routing as routing_router
 import routers.observe as observe_router
 import routers.keys as keys_router
 import routers.skills as skills_router
+import routers.prompts as prompts_router
 
 
 @asynccontextmanager
@@ -120,7 +121,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -136,6 +137,7 @@ app.include_router(routing_router.router)
 app.include_router(observe_router.router)
 app.include_router(keys_router.router)
 app.include_router(skills_router.router)
+app.include_router(prompts_router.router)
 
 
 # Auth endpoints
