@@ -132,7 +132,7 @@ export default function ChatMessage({ msg }) {
     return (
       <div className="flex justify-end mb-4">
         <div
-          className="max-w-[75%] px-3.5 py-2.5 rounded-xl text-sm"
+          className="max-w-[75%] px-3.5 py-2.5 rounded-xl text-base"
           style={{
             background: '#1E1E1E',
             border: '1px solid #2A2A2A',
@@ -218,7 +218,7 @@ export default function ChatMessage({ msg }) {
 
       {/* Message body */}
       <div
-        className="text-sm rounded-xl px-4 py-3"
+        className="text-base rounded-xl px-4 py-3"
         style={{
           background: isError ? '#1A0A0A' : '#141414',
           border: `1px solid ${isError ? '#4A1A1A' : '#1E1E1E'}`,
