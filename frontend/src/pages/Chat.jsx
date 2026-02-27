@@ -342,14 +342,14 @@ export default function Chat() {
         >
           <button
             onClick={handleNewThread}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors"
-            style={{ color: '#555', border: '1px solid #1E1E1E' }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm transition-colors"
+            style={{ color: '#CCC', border: '1px solid #2A2A2A' }}
             onMouseEnter={(e) => { e.currentTarget.style.color = '#E8472A'; e.currentTarget.style.borderColor = '#E8472A40' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#555'; e.currentTarget.style.borderColor = '#1E1E1E' }}
-            title="New thread"
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#CCC'; e.currentTarget.style.borderColor = '#2A2A2A' }}
+            title="New chat"
           >
-            <Plus size={12} />
-            New thread
+            <Plus size={13} />
+            New Chat
           </button>
 
           <div className="flex items-center gap-3 ml-auto text-xs" style={{ color: '#555' }}>
