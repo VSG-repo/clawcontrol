@@ -17,7 +17,8 @@ from typing import AsyncIterator, Optional
 
 import httpx
 
-OPENCLAW_CONFIG = os.path.expanduser("~/.openclaw/openclaw.json")
+OPENCLAW_CONFIG  = os.path.expanduser("~/.openclaw/openclaw.json")
+OPENROUTER_URL   = "https://openrouter.ai/api/v1/chat/completions"
 
 # USD per 1M tokens (input_rate, output_rate)
 _MODEL_RATES: dict[str, tuple[float, float]] = {
@@ -30,16 +31,9 @@ _MODEL_RATES: dict[str, tuple[float, float]] = {
 }
 
 
-def _load_gateway_config() -> tuple[int, str]:
-    try:
-        with open(OPENCLAW_CONFIG, "r") as f:
-            config = json.load(f)
-        gw = config.get("gateway", {})
-        port = gw.get("port", 18789)
-        token = gw.get("auth", {}).get("token", "")
-        return port, token
-    except Exception:
-        return 18789, ""
+def _load_openrouter_key() -> str:
+    """Read OPENROUTER_API_KEY from backend/.env (already loaded by dotenv at startup)."""
+    return os.environ.get("OPENROUTER_API_KEY", "")
 
 
 def _estimate_tokens(text: str) -> int:
@@ -64,13 +58,18 @@ async def stream_chat(
     Async generator yielding SSE-formatted strings.
     Events: start, chunk, done, error.
     """
-    port, token = _load_gateway_config()
-    url = f"http://localhost:{port}/v1/chat/completions"
+    api_key = _load_openrouter_key()
+    if not api_key:
+        yield _sse({"type": "error", "message": "OPENROUTER_API_KEY is not set in backend/.env"})
+        return
 
     requested_model_id = model_id or "openrouter/openai/gpt-oss-20b"
 
+    # OpenRouter model IDs don't include the "openrouter/" namespace prefix
+    openrouter_model_id = requested_model_id.removeprefix("openrouter/")
+
     body = {
-        "model": requested_model_id,
+        "model": openrouter_model_id,
         "messages": messages,
         "stream": True,
     }
@@ -96,12 +95,14 @@ async def stream_chat(
         ) as client:
             async with client.stream(
                 "POST",
-                url,
+                OPENROUTER_URL,
                 json=body,
                 headers={
-                    "Authorization": f"Bearer {token}",
+                    "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                     "Accept": "text/event-stream",
+                    "HTTP-Referer": "http://localhost:3000",
+                    "X-Title": "ClawControl",
                 },
             ) as resp:
                 if resp.status_code != 200:
@@ -132,7 +133,7 @@ async def stream_chat(
 
                         failover = (
                             bool(response_model_id)
-                            and response_model_id != requested_model_id
+                            and response_model_id != openrouter_model_id
                         )
                         failover_from = requested_model_id if failover else None
 
