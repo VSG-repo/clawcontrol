@@ -78,15 +78,15 @@ function LogEntry({ entry }) {
       style={{ background: cfg.bg, borderBottom: '1px solid #141414' }}
     >
       <span
-        className="flex-shrink-0 mt-0.5 text-sm font-bold px-1.5 py-0.5 rounded"
+        className="flex-shrink-0 mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded"
         style={{ color: cfg.color, background: `${cfg.color}18`, minWidth: '44px', textAlign: 'center' }}
       >
         {entry.level}
       </span>
-      <span className="text-base flex-shrink-0 mt-0.5 tabular-nums" style={{ color: '#444', minWidth: '68px' }}>
+      <span className="text-sm flex-shrink-0 mt-0.5 tabular-nums" style={{ color: '#444', minWidth: '68px' }}>
         {fmtTs(entry.ts)}
       </span>
-      <span className="text-base leading-relaxed break-all" style={{ color: '#999' }}>
+      <span className="text-sm leading-relaxed break-all" style={{ color: '#999' }}>
         {entry.message}
       </span>
     </div>
