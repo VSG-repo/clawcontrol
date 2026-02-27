@@ -378,22 +378,26 @@ export default function Layout({ children }) {
               )
             })}
           </div>
+
+          {/* ClawControl icon — fills remaining nav space */}
+          <div className="flex-1 flex items-center justify-center" style={{ marginBottom: '25px' }}>
+            <img
+              src="/clawcontrol-icon.png"
+              alt="ClawControl"
+              style={{
+                width:        collapsed ? '40px' : '100px',
+                height:       collapsed ? '40px' : '100px',
+                objectFit:    'cover',
+                borderRadius: '50%',
+                transition:   'width 0.18s ease, height 0.18s ease',
+                flexShrink:   0,
+              }}
+            />
+          </div>
         </nav>
 
         {/* Footer */}
         <div className="p-2 border-t flex-shrink-0" style={{ borderColor: '#1E1E1E' }}>
-          {/* Claw icon — orange when live, grey when disconnected */}
-          <div
-            className="flex items-center justify-center py-2"
-            title={wsConnected ? 'OpenClaw live' : 'OpenClaw disconnected'}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M 9 22 C 4 16 1 10 4 3" stroke={wsConnected ? '#E8472A' : '#333'} strokeWidth="2.2" strokeLinecap="round" style={{ transition: 'stroke 0.3s ease' }} />
-              <path d="M 12 22 C 13 15 11 8 12 2" stroke={wsConnected ? '#E8472A' : '#333'} strokeWidth="2.2" strokeLinecap="round" style={{ transition: 'stroke 0.3s ease' }} />
-              <path d="M 15 22 C 20 16 23 10 20 3" stroke={wsConnected ? '#E8472A' : '#333'} strokeWidth="2.2" strokeLinecap="round" style={{ transition: 'stroke 0.3s ease' }} />
-            </svg>
-          </div>
-
           {/* WS status */}
           <div
             className="flex items-center gap-2 px-2 py-1.5"
