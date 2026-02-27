@@ -316,7 +316,7 @@ export default function Overview() {
         fetch('/api/credits',              { headers }).then((r) => r.json()),
         fetch('/api/models',               { headers }).then((r) => r.json()),
         fetch('/api/health-probe',         { headers }).then((r) => r.json()),
-        fetch('/api/logs?level=ALL&limit=8&sources=gateway,audit', { headers }).then((r) => r.json()),
+        fetch('/api/logs?level=ALL&limit=5&sources=gateway,audit', { headers }).then((r) => r.json()),
         fetch(`/api/logs?level=ALL&limit=1000&since=${encodeURIComponent(todayStart())}&sources=gateway,audit`, { headers }).then((r) => r.json()),
         fetch('/api/agents',               { headers }).then((r) => r.json()),
         fetch('/api/orders?limit=5',       { headers }).then((r) => r.json()),
@@ -525,7 +525,7 @@ export default function Overview() {
           <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
             Recent Activity
           </span>
-          <span className="text-sm" style={{ color: '#333' }}>last 8 entries</span>
+          <span className="text-sm" style={{ color: '#333' }}>last 5 entries</span>
         </div>
 
         <div>
