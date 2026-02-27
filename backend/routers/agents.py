@@ -56,7 +56,7 @@ def _load_cc() -> dict:
 # ── Primary agent builder ──────────────────────────────────────────────────────
 
 def _build_primary(oc: dict, cc: dict) -> dict:
-    defaults = oc.get("defaults", {})
+    defaults = oc.get("agents", {}).get("defaults", {})
     model    = defaults.get("model", {})
 
     primary_name = (
@@ -74,10 +74,10 @@ def _build_primary(oc: dict, cc: dict) -> dict:
             "primary":   model.get("primary"),
             "fallbacks": model.get("fallbacks", []),
         },
-        "workspace":     oc.get("workspace"),
-        "compaction":    oc.get("compaction"),
-        "maxConcurrent": oc.get("maxConcurrent"),
-        "subagents":     oc.get("subagents"),
+        "workspace":     defaults.get("workspace"),
+        "compaction":    defaults.get("compaction"),
+        "maxConcurrent": defaults.get("maxConcurrent"),
+        "subagents":     defaults.get("subagents"),
     }
 
 
