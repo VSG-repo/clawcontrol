@@ -78,15 +78,15 @@ function LogEntry({ entry }) {
       style={{ background: cfg.bg, borderBottom: '1px solid #141414' }}
     >
       <span
-        className="flex-shrink-0 mt-0.5 text-xs font-bold px-1.5 py-0.5 rounded"
+        className="flex-shrink-0 mt-0.5 text-sm font-bold px-1.5 py-0.5 rounded"
         style={{ color: cfg.color, background: `${cfg.color}18`, minWidth: '44px', textAlign: 'center' }}
       >
         {entry.level}
       </span>
-      <span className="text-sm flex-shrink-0 mt-0.5 tabular-nums" style={{ color: '#444', minWidth: '68px' }}>
+      <span className="text-base flex-shrink-0 mt-0.5 tabular-nums" style={{ color: '#444', minWidth: '68px' }}>
         {fmtTs(entry.ts)}
       </span>
-      <span className="text-sm leading-relaxed break-all" style={{ color: '#999' }}>
+      <span className="text-base leading-relaxed break-all" style={{ color: '#999' }}>
         {entry.message}
       </span>
     </div>
@@ -316,7 +316,7 @@ export default function Overview() {
         fetch('/api/credits',              { headers }).then((r) => r.json()),
         fetch('/api/models',               { headers }).then((r) => r.json()),
         fetch('/api/health-probe',         { headers }).then((r) => r.json()),
-        fetch('/api/logs?level=ALL&limit=5&sources=gateway,audit', { headers }).then((r) => r.json()),
+        fetch('/api/logs?level=ALL&limit=8&sources=gateway,audit', { headers }).then((r) => r.json()),
         fetch(`/api/logs?level=ALL&limit=1000&since=${encodeURIComponent(todayStart())}&sources=gateway,audit`, { headers }).then((r) => r.json()),
         fetch('/api/agents',               { headers }).then((r) => r.json()),
         fetch('/api/orders?limit=5',       { headers }).then((r) => r.json()),
@@ -525,7 +525,7 @@ export default function Overview() {
           <span className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
             Recent Activity
           </span>
-          <span className="text-sm" style={{ color: '#333' }}>last 5 entries</span>
+          <span className="text-sm" style={{ color: '#333' }}>last 8 entries</span>
         </div>
 
         <div>
