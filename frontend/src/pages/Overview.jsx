@@ -103,6 +103,105 @@ function QuickGlanceRow({ icon: Icon, label, value, valueColor }) {
   )
 }
 
+// ── Agents Summary Card ───────────────────────────────────────────────────────
+
+function AgentsSummaryCard({ agentsData, recentOrders, loading, onNavigate }) {
+  const primary     = agentsData?.primary
+  const custom      = agentsData?.custom ?? []
+  const customCount = custom.length
+  const shown       = custom.slice(0, 3)
+  const overflow    = customCount - shown.length
+
+  return (
+    <div
+      className="rounded-lg p-4 flex flex-col gap-3"
+      style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}
+    >
+      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
+        Agents
+      </p>
+
+      {!agentsData && loading ? (
+        <div className="flex-1 flex items-center justify-center py-6">
+          <span className="text-sm" style={{ color: '#444' }}>Loading…</span>
+        </div>
+      ) : (
+        <>
+          {/* Primary agent */}
+          {primary && (
+            <div
+              className="flex items-start gap-2.5 pb-2.5"
+              style={{ borderBottom: '1px solid #1E1E1E' }}
+            >
+              <span
+                className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
+                style={{ background: '#4CAF50', boxShadow: '0 0 4px #4CAF5088' }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-white truncate">{primary.name}</p>
+                {primary.model?.primary && (
+                  <p className="text-xs truncate font-mono" style={{ color: '#666' }}>
+                    {primary.model.primary}
+                  </p>
+                )}
+              </div>
+              <span
+                className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+                style={{ background: '#E8472A15', border: '1px solid #E8472A30', color: '#E8472A' }}
+              >
+                Primary
+              </span>
+            </div>
+          )}
+
+          {/* Custom agents */}
+          <div className="space-y-1.5">
+            <p className="text-xs" style={{ color: '#888' }}>
+              {customCount === 0
+                ? 'No custom agents'
+                : `${customCount} custom agent${customCount !== 1 ? 's' : ''}`}
+            </p>
+            {shown.map((agent) => (
+              <div key={agent.id} className="flex items-center gap-2">
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  style={{ background: agent.status === 'active' ? '#4CAF50' : '#444' }}
+                />
+                <span className="text-sm truncate" style={{ color: '#AAA' }}>{agent.name}</span>
+              </div>
+            ))}
+            {overflow > 0 && (
+              <p className="text-xs" style={{ color: '#555' }}>+ {overflow} more</p>
+            )}
+          </div>
+
+          {/* Recent orders */}
+          <div className="flex items-center justify-between">
+            <span className="text-sm" style={{ color: '#666' }}>Recent orders</span>
+            <span className="text-sm font-medium" style={{ color: '#CCC' }}>
+              {recentOrders.length}
+            </span>
+          </div>
+        </>
+      )}
+
+      {/* Manage fleet link */}
+      <div className="mt-auto pt-2" style={{ borderTop: '1px solid #222' }}>
+        <button
+          onClick={onNavigate}
+          className="flex items-center gap-1 text-sm transition-colors"
+          style={{ color: '#E8472A' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6040')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#E8472A')}
+        >
+          Manage fleet
+          <ArrowRight size={11} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Alerts Summary Card ───────────────────────────────────────────────────────
 
 function AlertsSummaryCard({ alerts, loading, onNavigate }) {
@@ -199,10 +298,12 @@ export default function Overview() {
   const [credits, setCredits] = useState(null)
   const [model, setModel]     = useState(null)
   const [probe, setProbe]     = useState(null)
-  const [logs, setLogs]       = useState([])
+  const [logs, setLogs]           = useState([])
   const [todayCount, setTodayCount] = useState(null)
-  const [alerts, setAlerts]   = useState([])
-  const [loading, setLoading] = useState(false)
+  const [alerts, setAlerts]       = useState([])
+  const [agentsData, setAgentsData] = useState(null)
+  const [recentOrders, setRecentOrders] = useState([])
+  const [loading, setLoading]     = useState(false)
   const [lastFetch, setLastFetch] = useState(null)
 
   const headers = { Authorization: `Bearer ${authToken}` }
@@ -210,13 +311,15 @@ export default function Overview() {
   const fetchAll = useCallback(async () => {
     setLoading(true)
     try {
-      const [statusRes, creditsRes, modelsRes, probeRes, logsRes, todayRes] = await Promise.allSettled([
-        fetch('/api/status',       { headers }).then((r) => r.json()),
-        fetch('/api/credits',      { headers }).then((r) => r.json()),
-        fetch('/api/models',       { headers }).then((r) => r.json()),
-        fetch('/api/health-probe', { headers }).then((r) => r.json()),
+      const [statusRes, creditsRes, modelsRes, probeRes, logsRes, todayRes, agentsRes, ordersRes] = await Promise.allSettled([
+        fetch('/api/status',               { headers }).then((r) => r.json()),
+        fetch('/api/credits',              { headers }).then((r) => r.json()),
+        fetch('/api/models',               { headers }).then((r) => r.json()),
+        fetch('/api/health-probe',         { headers }).then((r) => r.json()),
         fetch('/api/logs?level=ALL&limit=5&sources=gateway,audit', { headers }).then((r) => r.json()),
         fetch(`/api/logs?level=ALL&limit=1000&since=${encodeURIComponent(todayStart())}&sources=gateway,audit`, { headers }).then((r) => r.json()),
+        fetch('/api/agents',               { headers }).then((r) => r.json()),
+        fetch('/api/orders?limit=5',       { headers }).then((r) => r.json()),
       ])
 
       if (statusRes.status === 'fulfilled') setStatus(statusRes.value)
@@ -225,6 +328,8 @@ export default function Overview() {
       if (probeRes.status === 'fulfilled') setProbe(probeRes.value)
       if (logsRes.status === 'fulfilled') setLogs((logsRes.value?.logs ?? []).slice().reverse())
       if (todayRes.status === 'fulfilled') setTodayCount(todayRes.value?.total ?? 0)
+      if (agentsRes.status === 'fulfilled') setAgentsData(agentsRes.value)
+      if (ordersRes.status === 'fulfilled') setRecentOrders(ordersRes.value?.orders ?? [])
 
       const alertList = await detectAlerts(authToken).catch(() => [])
       setAlerts(alertList)
@@ -297,8 +402,8 @@ export default function Overview() {
         />
       </div>
 
-      {/* Row 1: System Quick Glance | Alerts Summary | Task Queue */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      {/* Row 1: Quick Glance | Agents | Alerts | Task Queue */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
 
         {/* System Quick Glance */}
         <div
@@ -368,6 +473,14 @@ export default function Overview() {
             </span>
           </div>
         </div>
+
+        {/* Agents Summary */}
+        <AgentsSummaryCard
+          agentsData={agentsData}
+          recentOrders={recentOrders}
+          loading={loading}
+          onNavigate={() => navigate('/agents')}
+        />
 
         {/* Alerts Summary */}
         <AlertsSummaryCard
