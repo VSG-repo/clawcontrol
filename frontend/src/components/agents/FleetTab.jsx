@@ -153,39 +153,39 @@ function PrimaryAgentCard({ agent, authToken, onUpdated, onToast }) {
       </div>
 
       {/* Details grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div>
-          <p className="text-xs mb-0.5" style={{ color: '#999' }}>Primary Model</p>
-          <p style={{ color: '#CCC' }}>{model.primary || <span style={{ color: '#555' }}>—</span>}</p>
+          <p className="text-sm mb-0.5" style={{ color: '#999' }}>Primary Model</p>
+          <p className="text-base" style={{ color: '#CCC' }}>{model.primary || <span style={{ color: '#555' }}>—</span>}</p>
         </div>
         {model.fallbacks?.length > 0 && (
           <div>
-            <p className="text-xs mb-0.5" style={{ color: '#999' }}>Fallbacks</p>
-            <p style={{ color: '#CCC' }}>{model.fallbacks.join(', ')}</p>
+            <p className="text-sm mb-0.5" style={{ color: '#999' }}>Fallbacks</p>
+            <p className="text-base" style={{ color: '#CCC' }}>{model.fallbacks.join(', ')}</p>
           </div>
         )}
         {agent.workspace && (
           <div>
-            <p className="text-xs mb-0.5" style={{ color: '#999' }}>Workspace</p>
-            <p className="truncate font-mono text-xs" style={{ color: '#AAA' }}>{agent.workspace}</p>
+            <p className="text-sm mb-0.5" style={{ color: '#999' }}>Workspace</p>
+            <p className="truncate font-mono text-sm" style={{ color: '#AAA' }}>{agent.workspace}</p>
           </div>
         )}
         {agent.compaction != null && (
           <div>
-            <p className="text-xs mb-0.5" style={{ color: '#999' }}>Compaction</p>
-            <p style={{ color: '#CCC' }}>{typeof agent.compaction === 'object' ? (agent.compaction?.mode ?? JSON.stringify(agent.compaction)) : String(agent.compaction)}</p>
+            <p className="text-sm mb-0.5" style={{ color: '#999' }}>Compaction</p>
+            <p className="text-base" style={{ color: '#CCC' }}>{typeof agent.compaction === 'object' ? (agent.compaction?.mode ?? JSON.stringify(agent.compaction)) : String(agent.compaction)}</p>
           </div>
         )}
         {agent.maxConcurrent != null && (
           <div>
-            <p className="text-xs mb-0.5" style={{ color: '#999' }}>Max Concurrent</p>
-            <p style={{ color: '#CCC' }}>{agent.maxConcurrent}</p>
+            <p className="text-sm mb-0.5" style={{ color: '#999' }}>Max Concurrent</p>
+            <p className="text-base" style={{ color: '#CCC' }}>{agent.maxConcurrent}</p>
           </div>
         )}
         {subagents.maxConcurrent != null && (
           <div>
-            <p className="text-xs mb-0.5" style={{ color: '#999' }}>Subagents Max</p>
-            <p style={{ color: '#CCC' }}>{subagents.maxConcurrent}</p>
+            <p className="text-sm mb-0.5" style={{ color: '#999' }}>Subagents Max</p>
+            <p className="text-base" style={{ color: '#CCC' }}>{subagents.maxConcurrent}</p>
           </div>
         )}
       </div>
