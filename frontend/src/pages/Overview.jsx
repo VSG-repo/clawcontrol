@@ -11,6 +11,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
+import { detectAlerts } from '@/services/alertDetector'
 import {
   RefreshCw, ArrowRight, Circle, Cpu, DollarSign,
   CheckCircle2, XCircle, Clock, Activity,
@@ -102,6 +103,92 @@ function QuickGlanceRow({ icon: Icon, label, value, valueColor }) {
   )
 }
 
+// ── Alerts Summary Card ───────────────────────────────────────────────────────
+
+function AlertsSummaryCard({ alerts, loading, onNavigate }) {
+  const critical = alerts.filter((a) => a.severity === 'critical')
+  const warning  = alerts.filter((a) => a.severity === 'warning')
+  const info     = alerts.filter((a) => a.severity === 'info')
+  const total    = alerts.length
+  const hasCritical = critical.length > 0
+
+  return (
+    <div
+      className="rounded-lg p-4 flex flex-col gap-3"
+      style={{
+        background: hasCritical ? '#1F1414' : '#1A1A1A',
+        border: `1px solid ${hasCritical ? '#E0525240' : '#2A2A2A'}`,
+      }}
+    >
+      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: '#666' }}>
+        Alerts
+      </p>
+
+      {loading && total === 0 ? (
+        <div className="flex-1 flex items-center justify-center py-6">
+          <span className="text-sm" style={{ color: '#444' }}>Loading…</span>
+        </div>
+      ) : total === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-6 gap-2">
+          <CheckCircle2 size={20} color="#4CAF50" />
+          <p className="text-sm" style={{ color: '#4CAF50' }}>All clear</p>
+        </div>
+      ) : (
+        <>
+          {/* Total count */}
+          <div className="flex items-baseline gap-1.5">
+            <span
+              className="font-bold"
+              style={{ fontSize: '2rem', lineHeight: 1, color: hasCritical ? '#E05252' : '#FFF' }}
+            >
+              {total}
+            </span>
+            <span className="text-sm" style={{ color: '#666' }}>
+              {total === 1 ? 'alert' : 'alerts'}
+            </span>
+          </div>
+
+          {/* Breakdown by severity */}
+          <div className="space-y-1.5">
+            {critical.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#E05252', boxShadow: '0 0 4px #E0525288' }} />
+                <span className="text-sm" style={{ color: '#E05252' }}>{critical.length} critical</span>
+              </div>
+            )}
+            {warning.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#E0A020' }} />
+                <span className="text-sm" style={{ color: '#E0A020' }}>{warning.length} warning</span>
+              </div>
+            )}
+            {info.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#555' }} />
+                <span className="text-sm" style={{ color: '#888' }}>{info.length} info</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* View all link */}
+      <div className="mt-auto pt-2" style={{ borderTop: '1px solid #222' }}>
+        <button
+          onClick={onNavigate}
+          className="flex items-center gap-1 text-sm transition-colors"
+          style={{ color: '#E8472A' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#FF6040')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#E8472A')}
+        >
+          View all alerts
+          <ArrowRight size={11} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function Overview() {
@@ -114,6 +201,7 @@ export default function Overview() {
   const [probe, setProbe]     = useState(null)
   const [logs, setLogs]       = useState([])
   const [todayCount, setTodayCount] = useState(null)
+  const [alerts, setAlerts]   = useState([])
   const [loading, setLoading] = useState(false)
   const [lastFetch, setLastFetch] = useState(null)
 
@@ -137,6 +225,9 @@ export default function Overview() {
       if (probeRes.status === 'fulfilled') setProbe(probeRes.value)
       if (logsRes.status === 'fulfilled') setLogs((logsRes.value?.logs ?? []).slice().reverse())
       if (todayRes.status === 'fulfilled') setTodayCount(todayRes.value?.total ?? 0)
+
+      const alertList = await detectAlerts(authToken).catch(() => [])
+      setAlerts(alertList)
 
       setLastFetch(new Date())
     } finally {
@@ -206,8 +297,8 @@ export default function Overview() {
         />
       </div>
 
-      {/* Row 1: System Quick Glance + Task Queue side by side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      {/* Row 1: System Quick Glance | Alerts Summary | Task Queue */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
 
         {/* System Quick Glance */}
         <div
@@ -277,6 +368,13 @@ export default function Overview() {
             </span>
           </div>
         </div>
+
+        {/* Alerts Summary */}
+        <AlertsSummaryCard
+          alerts={alerts}
+          loading={loading}
+          onNavigate={() => navigate('/alerts')}
+        />
 
         {/* Task Queue placeholder */}
         <div
