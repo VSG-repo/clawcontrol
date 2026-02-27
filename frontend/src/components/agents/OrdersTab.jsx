@@ -282,7 +282,7 @@ export default function OrdersTab() {
         />
 
         <div className="flex items-center justify-between">
-          <p className="text-xs" style={{ color: '#444' }}>Cmd/Ctrl+Enter to send</p>
+          <p className="text-sm" style={{ color: '#999' }}>Cmd/Ctrl+Enter to send</p>
           <button
             onClick={send}
             disabled={sending || !directive.trim() || !selectedAgentId}
@@ -347,7 +347,7 @@ export default function OrdersTab() {
         ) : orders.length === 0 ? (
           <div className="py-16 text-center" style={{ color: '#444' }}>
             <Clock size={28} className="mx-auto mb-3 opacity-20" />
-            <p className="text-sm">No orders sent yet</p>
+            <p className="text-base" style={{ color: '#999' }}>No orders sent yet</p>
           </div>
         ) : (
           <div className="space-y-2">

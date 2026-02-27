@@ -138,7 +138,7 @@ function ScheduleField({ value, onChange }) {
             value={value}
             onChange={(e) => onChange(e.target.value)}
           />
-          <p className="text-xs" style={{ color: '#555' }}>
+          <p className="text-xs" style={{ color: '#888' }}>
             minute hour day month weekday — e.g. 0 9 * * 1-5 (weekdays at 9am)
           </p>
         </div>
@@ -163,20 +163,20 @@ function SystemJobRow({ job }) {
             {job.name || 'Unnamed job'}
           </span>
           {job.description && (
-            <span className="text-xs" style={{ color: '#555' }}>{job.description}</span>
+            <span className="text-xs" style={{ color: '#888' }}>{job.description}</span>
           )}
         </div>
         <div className="flex items-center gap-3 mt-1 flex-wrap">
-          <span className="text-xs font-mono" style={{ color: '#555' }}>{job.schedule}</span>
+          <span className="text-xs font-mono" style={{ color: '#888' }}>{job.schedule}</span>
           {PRESET_MAP[job.schedule] && (
-            <span className="text-xs" style={{ color: '#444' }}>({PRESET_MAP[job.schedule]})</span>
+            <span className="text-xs" style={{ color: '#777' }}>({PRESET_MAP[job.schedule]})</span>
           )}
         </div>
       </div>
 
       <span
         className="text-xs px-1.5 py-0.5 rounded flex-shrink-0 flex items-center gap-1"
-        style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#555' }}
+        style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#777' }}
       >
         <Lock size={9} /> System
       </span>
@@ -405,21 +405,21 @@ function CronJobCard({ job, agentName, agents, authToken, onUpdated, onToast }) 
 
         {/* Description */}
         {job.description && (
-          <p className="text-xs" style={{ color: '#666' }}>{job.description}</p>
+          <p className="text-sm" style={{ color: '#999' }}>{job.description}</p>
         )}
 
         {/* Agent + schedule */}
         <div className="flex items-center gap-2 flex-wrap">
           <AgentBadge name={agentName} />
-          <span className="text-xs font-mono" style={{ color: '#666' }}>{job.schedule}</span>
+          <span className="text-xs font-mono" style={{ color: '#AAA' }}>{job.schedule}</span>
           {PRESET_MAP[job.schedule] && (
-            <span className="text-xs" style={{ color: '#555' }}>({PRESET_MAP[job.schedule]})</span>
+            <span className="text-xs" style={{ color: '#888' }}>({PRESET_MAP[job.schedule]})</span>
           )}
         </div>
 
         {/* Directive preview */}
         {job.directive && (
-          <p className="text-xs line-clamp-2" style={{ color: '#555', fontStyle: 'italic' }}>
+          <p className="text-sm line-clamp-2" style={{ color: '#888', fontStyle: 'italic' }}>
             {job.directive}
           </p>
         )}
@@ -427,13 +427,13 @@ function CronJobCard({ job, agentName, agents, authToken, onUpdated, onToast }) 
         {/* Footer: last / next run */}
         <div className="flex items-center gap-4 pt-1" style={{ borderTop: '1px solid #222' }}>
           <div>
-            <span className="text-xs" style={{ color: '#444' }}>Last run: </span>
-            <span className="text-xs" style={{ color: '#666' }}>{timeAgo(job.lastRun)}</span>
+            <span className="text-xs" style={{ color: '#777' }}>Last run: </span>
+            <span className="text-xs" style={{ color: '#999' }}>{timeAgo(job.lastRun)}</span>
           </div>
           {job.nextRun && (
             <div>
-              <span className="text-xs" style={{ color: '#444' }}>Next: </span>
-              <span className="text-xs" style={{ color: '#666' }}>{timeAgo(job.nextRun)}</span>
+              <span className="text-xs" style={{ color: '#777' }}>Next: </span>
+              <span className="text-xs" style={{ color: '#999' }}>{timeAgo(job.nextRun)}</span>
             </div>
           )}
         </div>
@@ -670,7 +670,7 @@ export default function CronTab() {
 
         {systemJobs.length === 0 ? (
           <div className="py-8 text-center" style={{ color: '#444' }}>
-            <p className="text-sm">No system cron jobs configured</p>
+            <p className="text-base" style={{ color: '#999' }}>No system cron jobs configured</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -719,7 +719,7 @@ export default function CronTab() {
         {customJobs.length === 0 ? (
           <div className="py-16 text-center" style={{ color: '#444' }}>
             <Clock size={28} className="mx-auto mb-3 opacity-20" />
-            <p className="text-sm">No scheduled jobs yet — create one to automate your agents</p>
+            <p className="text-base" style={{ color: '#999' }}>No scheduled jobs yet — create one to automate your agents</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
