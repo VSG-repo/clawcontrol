@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
+import { useDebugStore } from '@/store/useDebugStore'
 
 const BASE_DELAY = 1000
 const MAX_DELAY = 30000
@@ -29,6 +30,7 @@ export function useWebSocket() {
         retryCountRef.current = 0
         setWsConnected(true)
         setWsRetryCount(0)
+        useDebugStore.getState().addEntry('success', 'ws', 'connected')
       }
 
       ws.onmessage = (event) => {
@@ -38,16 +40,18 @@ export function useWebSocket() {
           applyWsUpdate(data)
         } catch (e) {
           console.warn('WS parse error:', e)
+          useDebugStore.getState().addEntry('warn', 'ws', 'parse error', e.message)
         }
       }
 
       ws.onerror = () => {
-        // onclose will handle retry
+        useDebugStore.getState().addEntry('error', 'ws', 'socket error')
       }
 
       ws.onclose = () => {
         if (!mountedRef.current) return
         setWsConnected(false)
+        useDebugStore.getState().addEntry('warn', 'ws', `disconnected (retry ${retryCountRef.current + 1}/${MAX_RETRIES})`)
         if (retryCountRef.current < MAX_RETRIES) {
           const delay = Math.min(BASE_DELAY * Math.pow(1.5, retryCountRef.current), MAX_DELAY)
           retryCountRef.current++
@@ -57,6 +61,7 @@ export function useWebSocket() {
       }
     } catch (e) {
       console.error('WS connect error:', e)
+      useDebugStore.getState().addEntry('error', 'ws', 'connect error', e.message)
     }
   }, [setWsConnected, setWsRetryCount, applyWsUpdate])
 

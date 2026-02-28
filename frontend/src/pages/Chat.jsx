@@ -19,6 +19,7 @@ import {
   Paperclip, X, Square
 } from 'lucide-react'
 import { useChat } from '@/hooks/useChat'
+import { useDebugStore } from '@/store/useDebugStore'
 import { useSessionStore } from '@/store/useSessionStore'
 import ChatMessage from '@/components/ChatMessage'
 import ArtifactPane from '@/components/ArtifactPane'
@@ -141,13 +142,16 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
       toAdd.forEach((file) => {
         const reader = new FileReader()
         reader.onload = (ev) => {
+          const attType = file.type.startsWith('image/') ? 'image' : 'file'
+          const sizeKb = Math.round(ev.target.result.length * 0.75 / 1024)
+          useDebugStore.getState().addEntry('info', 'attach', `${attType}: ${file.name} (${sizeKb} KB, ${file.type || 'unknown'})`)
           setAttachments((p) => {
             if (p.length >= 5) return p
             const isDupe = p.some((a) => a.name === file.name && a.data.length === ev.target.result.length)
             if (isDupe) return p
             return [...p, {
               id: crypto.randomUUID(),
-              type: file.type.startsWith('image/') ? 'image' : 'file',
+              type: attType,
               name: file.name,
               data: ev.target.result,
               mime: file.type || 'application/octet-stream',

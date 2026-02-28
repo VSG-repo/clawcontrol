@@ -10,6 +10,7 @@
  */
 import { useState, useCallback, useRef } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
+import { useDebugStore } from '@/store/useDebugStore'
 
 function makeUserMsg(text, attachments = []) {
   return {
@@ -163,8 +164,10 @@ export function useChat() {
   )
 
   function handleEvent(event, requestId) {
+    const dbg = useDebugStore.getState()
     switch (event.type) {
       case 'start':
+        dbg.addEntry('info', 'sse', `start → model: ${event.model ?? '?'}${event.failover ? ` (failover from ${event.failover_from})` : ''}${event.auto_switched ? ` (auto-switched from ${event.auto_switched_from})` : ''}`)
         patchMessage(requestId, {
           id: event.id || requestId,
           model: event.model,
@@ -216,9 +219,11 @@ export function useChat() {
         )
         setSessionCost((c) => c + (event.cost_estimate_usd ?? 0))
         setSessionTokens((t) => t + (event.token_estimate ?? 0))
+        dbg.addEntry('success', 'sse', `done — ${event.token_estimate ?? 0} tok, $${(event.cost_estimate_usd ?? 0).toFixed(6)}, ${event.latency_ms ?? 0}ms`)
         break
 
       case 'error':
+        dbg.addEntry('error', 'sse', `error: ${event.message}`, event.detail ?? null)
         setMessages((prev) =>
           prev.map((m) => {
             if (m.id === requestId) {

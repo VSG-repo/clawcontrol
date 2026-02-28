@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
+import { useDebugStore } from '@/store/useDebugStore'
 import { detectAlerts } from '@/services/alertDetector'
 import {
   Activity, MessageSquare, Cpu, Key, Puzzle,
   BookOpen, ScrollText, LogOut, Wifi, WifiOff, Menu,
-  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard, Bell, Bot,
+  Pin, ChevronDown, MoreHorizontal, Pencil, Trash2, LayoutDashboard, Bell, Bot, Bug,
 } from 'lucide-react'
 import NotificationPanel from '@/components/NotificationPanel'
 import ClawControlLogo from '@/components/ClawControlLogo'
+import DebugPanel from '@/components/DebugPanel'
 import { useSessionStore } from '@/store/useSessionStore'
 
 function formatAgo(isoString) {
@@ -41,6 +43,8 @@ function loadDismissed() {
 
 export default function Layout({ children }) {
   const { wsConnected, clearAuth, authToken } = useWagzStore()
+  const toggleDebug = useDebugStore((s) => s.toggle)
+  const debugOpen = useDebugStore((s) => s.open)
   const location = useLocation()
   const isChatRoute = location.pathname === '/chat'
 
@@ -457,6 +461,22 @@ export default function Layout({ children }) {
             )}
           </div>
 
+          {/* Debug toggle */}
+          <button
+            onClick={toggleDebug}
+            className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-md text-sm transition-colors"
+            style={{
+              color: debugOpen ? '#E8472A' : '#555555',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#E8472A' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = debugOpen ? '#E8472A' : '#555555' }}
+            title="Toggle debug console"
+          >
+            <Bug size={14} className="flex-shrink-0" />
+            {!collapsed && <span className="text-xs">Debug</span>}
+          </button>
+
           {/* Logout */}
           <button
             onClick={handleLogout}
@@ -479,6 +499,9 @@ export default function Layout({ children }) {
       <main className="flex-1 overflow-y-auto min-w-0" style={{ background: '#0D0D0D' }}>
         {children}
       </main>
+
+      {/* Debug panel — fixed overlay, manages its own open state */}
+      <DebugPanel />
     </div>
   )
 }
