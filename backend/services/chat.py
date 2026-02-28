@@ -215,10 +215,11 @@ async def stream_chat(
             ) as resp:
                 if resp.status_code != 200:
                     err_body = await resp.aread()
+                    err_text = err_body.decode(errors="replace")
                     yield _sse({
                         "type": "error",
                         "message": f"Gateway returned HTTP {resp.status_code}",
-                        "detail": err_body.decode(errors="replace")[:300],
+                        "detail": err_text[:300],
                     })
                     return
 
