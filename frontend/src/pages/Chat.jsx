@@ -164,6 +164,7 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
     const items = Array.from(e.clipboardData?.items ?? [])
     const imageItem = items.find((it) => it.type.startsWith('image/'))
     if (!imageItem) return
+    e.preventDefault()
     const file = imageItem.getAsFile()
     if (!file) return
     const reader = new FileReader()
