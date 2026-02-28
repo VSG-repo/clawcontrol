@@ -99,6 +99,7 @@ export function useChat() {
         attachments: opts.attachments ?? [],
       }
 
+      abortRef.current = new AbortController()
       try {
         const resp = await fetch('/api/chat/send', {
           method: 'POST',
@@ -107,7 +108,7 @@ export function useChat() {
             Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(body),
-          signal: abortRef.current?.signal,
+          signal: abortRef.current.signal,
         })
 
         if (!resp.ok) {
@@ -142,7 +143,10 @@ export function useChat() {
           }
         }
       } catch (err) {
-        if (err.name !== 'AbortError') {
+        if (err.name === 'AbortError') {
+          // Keep partial content, mark as done
+          patchMessage(requestId, { status: 'done' })
+        } else {
           console.error('Stream error:', err)
           patchMessage(requestId, {
             status: 'error',
@@ -245,10 +249,8 @@ export function useChat() {
     setSessionTokens(0)
   }, [])
 
-  const abort = useCallback(() => {
+  const stop = useCallback(() => {
     abortRef.current?.abort()
-    abortRef.current = new AbortController()
-    setIsStreaming(false)
   }, [])
 
   return {
@@ -260,8 +262,8 @@ export function useChat() {
     selectedModel,
     setSelectedModel,
     send,
+    stop,
     newThread,
     loadSession,
-    abort,
   }
 }

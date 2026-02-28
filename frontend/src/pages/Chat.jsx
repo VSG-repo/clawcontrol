@@ -16,7 +16,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   Send, ChevronRight, ChevronLeft, Cpu,
   DollarSign, Zap, RotateCcw, GripVertical, Plus,
-  Paperclip, X
+  Paperclip, X, Square
 } from 'lucide-react'
 import { useChat } from '@/hooks/useChat'
 import { useSessionStore } from '@/store/useSessionStore'
@@ -114,7 +114,7 @@ function ModelSelector({ models, selected, onSelect }) {
 
 // ─── Input bar ───────────────────────────────────────────────────────────────
 
-function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel }) {
+function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelectModel }) {
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState([])
   const [toast, setToast] = useState(null)
@@ -328,18 +328,29 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
           className="flex-1 resize-none bg-transparent text-sm outline-none"
           style={{ color: '#E8E8E8', lineHeight: '1.5', minHeight: '24px', maxHeight: '160px' }}
         />
-        <button
-          onClick={handleSubmit}
-          disabled={((!text.trim() && attachments.length === 0) || isStreaming)}
-          className="flex-shrink-0 p-2 rounded-lg transition-all"
-          style={{
-            background: (text.trim() || attachments.length > 0) && !isStreaming ? '#E8472A' : '#1E1E1E',
-            color: (text.trim() || attachments.length > 0) && !isStreaming ? '#FFF' : '#444',
-            cursor: (text.trim() || attachments.length > 0) && !isStreaming ? 'pointer' : 'not-allowed',
-          }}
-        >
-          {isStreaming ? <RotateCcw size={14} className="animate-spin" /> : <Send size={14} />}
-        </button>
+        {isStreaming ? (
+          <button
+            onClick={onStop}
+            className="flex-shrink-0 p-2 rounded-lg transition-all"
+            style={{ background: '#E8472A', color: '#FFF', cursor: 'pointer' }}
+            title="Stop generation"
+          >
+            <Square size={14} fill="#FFF" />
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={!text.trim() && attachments.length === 0}
+            className="flex-shrink-0 p-2 rounded-lg transition-all"
+            style={{
+              background: (text.trim() || attachments.length > 0) ? '#E8472A' : '#1E1E1E',
+              color: (text.trim() || attachments.length > 0) ? '#FFF' : '#444',
+              cursor: (text.trim() || attachments.length > 0) ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <Send size={14} />
+          </button>
+        )}
       </div>
       </div> {/* end drop zone */}
       <p className="text-xs mt-1.5 px-1" style={{ color: '#2A2A2A' }}>
@@ -363,6 +374,7 @@ export default function Chat() {
     selectedModel,
     setSelectedModel,
     send,
+    stop,
     newThread,
     loadSession,
   } = useChat()
@@ -586,6 +598,7 @@ export default function Chat() {
 
             <InputBar
               onSend={handleSend}
+              onStop={stop}
               isStreaming={isStreaming}
               models={models}
               selectedModel={selectedModel}
