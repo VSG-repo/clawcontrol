@@ -50,10 +50,6 @@ def _sse(data: dict) -> str:
     return f"data: {json.dumps(data)}\n\n"
 
 
-_TEXT_MIME_TYPES = {"text/plain", "text/csv", "text/markdown", "text/html",
-                    "application/json", "application/xml", "text/xml"}
-_TEXT_EXTENSIONS = {".txt", ".csv", ".md", ".markdown", ".json", ".xml", ".html", ".htm", ".log"}
-
 _ATTACHMENT_SIZE_LIMIT = 20 * 1024 * 1024  # 20 MB of base64 characters
 
 
@@ -77,17 +73,16 @@ def _build_multimodal_content(text: str, attachments: list[dict]):
         if att_type == "image":
             image_parts.append({"type": "image_url", "image_url": {"url": raw}})
         else:
+            print(f"FILE ATTACH: name={name!r}, data_prefix={raw[:80]!r}", flush=True)
             # Strip data-URI prefix before decoding (e.g. "data:text/plain;base64,...")
             payload = raw.split(",", 1)[1] if "," in raw else raw
-            ext = ("." + name.rsplit(".", 1)[-1].lower()) if "." in name else ""
-            is_text = mime in _TEXT_MIME_TYPES or ext in _TEXT_EXTENSIONS
-            if is_text:
-                try:
-                    decoded = base64.b64decode(payload).decode("utf-8", errors="replace")
-                    text_prefix += f"[Attached file: {name}]\n{decoded}\n\n"
-                except Exception:
-                    text_prefix += f"[Attached file: {name} — binary file, contents not shown]\n\n"
-            else:
+            try:
+                decoded_bytes = base64.b64decode(payload)
+                decoded = decoded_bytes.decode("utf-8")
+                text_prefix += f"[Attached file: {name}]\n{decoded}\n\n"
+            except UnicodeDecodeError:
+                text_prefix += f"[Attached file: {name} — binary file, contents not shown]\n\n"
+            except Exception:
                 text_prefix += f"[Attached file: {name} — binary file, contents not shown]\n\n"
 
     full_text = text_prefix + text
