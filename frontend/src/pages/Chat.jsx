@@ -15,7 +15,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import {
   Send, ChevronRight, ChevronLeft, Cpu,
-  DollarSign, Zap, RotateCcw, GripVertical, Plus
+  DollarSign, Zap, RotateCcw, GripVertical, Plus,
+  Paperclip, X
 } from 'lucide-react'
 import { useChat } from '@/hooks/useChat'
 import { useSessionStore } from '@/store/useSessionStore'
@@ -115,13 +116,81 @@ function ModelSelector({ models, selected, onSelect }) {
 
 function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel }) {
   const [text, setText] = useState('')
+  const [attachments, setAttachments] = useState([])
+  const [toast, setToast] = useState(null)
   const textareaRef = useRef(null)
+  const fileInputRef = useRef(null)
+
+  const showToast = (msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2500)
+  }
+
+  const addFiles = (files) => {
+    const fileArr = Array.from(files)
+    setAttachments((prev) => {
+      if (prev.length >= 5) {
+        showToast('Max 5 attachments per message')
+        return prev
+      }
+      const remaining = 5 - prev.length
+      if (fileArr.length > remaining) showToast('Max 5 attachments per message')
+      const toAdd = fileArr.slice(0, remaining)
+      toAdd.forEach((file) => {
+        const reader = new FileReader()
+        reader.onload = (ev) => {
+          setAttachments((p) => {
+            if (p.length >= 5) return p
+            return [...p, {
+              id: crypto.randomUUID(),
+              type: file.type.startsWith('image/') ? 'image' : 'file',
+              name: file.name,
+              data: ev.target.result,
+              mime: file.type || 'application/octet-stream',
+            }]
+          })
+        }
+        reader.readAsDataURL(file)
+      })
+      return prev
+    })
+  }
+
+  const handlePaste = (e) => {
+    const items = Array.from(e.clipboardData?.items ?? [])
+    const imageItems = items.filter((it) => it.type.startsWith('image/'))
+    if (imageItems.length === 0) return
+    imageItems.forEach((item) => {
+      const file = item.getAsFile()
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        setAttachments((prev) => {
+          if (prev.length >= 5) {
+            showToast('Max 5 attachments per message')
+            return prev
+          }
+          return [...prev, {
+            id: crypto.randomUUID(),
+            type: 'image',
+            name: 'pasted-image.png',
+            data: ev.target.result,
+            mime: file.type || 'image/png',
+          }]
+        })
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  const removeAttachment = (id) => setAttachments((prev) => prev.filter((a) => a.id !== id))
 
   const handleSubmit = (e) => {
     e?.preventDefault()
     if (!text.trim() || isStreaming) return
-    onSend(text)
+    onSend(text, attachments)
     setText('')
+    setAttachments([])
     textareaRef.current?.focus()
   }
 
@@ -141,18 +210,100 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
 
   return (
     <div className="flex-shrink-0 p-3" style={{ borderTop: '1px solid #1E1E1E', background: '#0D0D0D' }}>
+      {/* Toast */}
+      {toast && (
+        <div
+          className="mb-2 px-3 py-1.5 rounded-md text-xs"
+          style={{ background: '#1F1410', border: '1px solid #E8472A40', color: '#E8472A' }}
+        >
+          {toast}
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-2">
         <ModelSelector models={models} selected={selectedModel} onSelect={onSelectModel} />
       </div>
+
+      {/* Attachment preview strip */}
+      {attachments.length > 0 && (
+        <div
+          className="flex gap-2 overflow-x-auto py-2 px-3 mb-2 rounded-lg"
+          style={{ background: '#111', border: '1px solid #1E1E1E' }}
+        >
+          {attachments.map((att) =>
+            att.type === 'image' ? (
+              <div key={att.id} className="relative flex-shrink-0" style={{ width: 48, height: 48 }}>
+                <img
+                  src={att.data}
+                  alt={att.name}
+                  style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6, display: 'block' }}
+                />
+                <button
+                  onClick={() => removeAttachment(att.id)}
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    top: -4, right: -4, width: 16, height: 16, borderRadius: '50%',
+                    background: '#0D0D0D', border: '1px solid #3A3A3A', color: '#888',
+                  }}
+                >
+                  <X size={8} />
+                </button>
+              </div>
+            ) : (
+              <div
+                key={att.id}
+                className="relative flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs"
+                style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#999' }}
+              >
+                <span className="truncate" style={{ maxWidth: 140 }}>
+                  {att.name.length > 20 ? att.name.slice(0, 20) + '…' : att.name}
+                </span>
+                <button
+                  onClick={() => removeAttachment(att.id)}
+                  style={{ color: '#555', flexShrink: 0 }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#E8472A')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      {/* Input row */}
       <div
         className="flex items-end gap-2 rounded-xl px-3 py-2"
         style={{ background: '#141414', border: '1px solid #2A2A2A' }}
       >
+        {/* Paperclip */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex-shrink-0 p-1.5 rounded-md transition-colors"
+          style={{ color: '#555' }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#E8472A')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
+          title="Attach file"
+        >
+          <Paperclip size={14} />
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/png,image/jpeg,image/gif,image/webp,.pdf,.txt,.md,.csv"
+          className="hidden"
+          onChange={(e) => { addFiles(e.target.files); e.target.value = '' }}
+        />
+
         <textarea
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           placeholder="Message… (Enter to send, Shift+Enter for newline)"
           rows={1}
           className="flex-1 resize-none bg-transparent text-sm outline-none"
@@ -172,7 +323,7 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
         </button>
       </div>
       <p className="text-xs mt-1.5 px-1" style={{ color: '#2A2A2A' }}>
-        Routed through OpenClaw gateway · context persists in thread
+        Routed via OpenRouter · context persists in thread
       </p>
     </div>
   )
@@ -276,8 +427,8 @@ export default function Chat() {
 
   // Send handler — creates session on first message in a new thread
   const handleSend = useCallback(
-    async (text) => {
-      const usedCtxId = await send(text)
+    async (text, attachments = []) => {
+      const usedCtxId = await send(text, { attachments })
       if (!usedCtxId) return
       // Create session entry if this is a new context
       if (!sessions.find((s) => s.id === usedCtxId)) {

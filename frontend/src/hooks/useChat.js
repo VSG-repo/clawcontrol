@@ -95,6 +95,7 @@ export function useChat() {
         context_id: effectiveContextId,
         model_id: selectedModel,
         new_thread: opts.newThread ?? false,
+        attachments: opts.attachments ?? [],
       }
 
       try {
