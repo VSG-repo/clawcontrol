@@ -27,6 +27,7 @@ class SendRequest(BaseModel):
     context_id: Optional[str] = None
     model_id: Optional[str] = None  # None = gateway picks primary
     new_thread: bool = False
+    attachments: list[dict] = []
 
 
 @router.post("/api/chat/send")
@@ -49,6 +50,7 @@ async def chat_send(req: SendRequest, _=Depends(require_auth)):
             messages=list(history),
             model_id=req.model_id,
             request_id=request_id,
+            attachments=req.attachments,
         ):
             # Track assistant content for history storage
             if event_str.startswith("data: "):

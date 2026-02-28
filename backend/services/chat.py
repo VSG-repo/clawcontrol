@@ -9,6 +9,7 @@ Flow:
   5. Estimate tokens from char count (OpenClaw returns usage:{0,0,0})
   6. Estimate cost from per-model rate table
 """
+import base64
 import json
 import os
 import time
@@ -49,10 +50,55 @@ def _sse(data: dict) -> str:
     return f"data: {json.dumps(data)}\n\n"
 
 
+_TEXT_MIME_TYPES = {"text/plain", "text/csv", "text/markdown", "text/html",
+                    "application/json", "application/xml", "text/xml"}
+_TEXT_EXTENSIONS = {".txt", ".csv", ".md", ".markdown", ".json", ".xml", ".html", ".htm", ".log"}
+
+_ATTACHMENT_SIZE_LIMIT = 20 * 1024 * 1024  # 20 MB of base64 characters
+
+
+def _build_multimodal_content(text: str, attachments: list[dict]) -> list[dict]:
+    """
+    Convert a plain-text user message + attachments into the OpenAI vision
+    content array format.  Text files are inlined into the text part;
+    images become image_url parts.
+    """
+    text_prefix = ""
+    image_parts: list[dict] = []
+
+    for att in attachments:
+        att_type = att.get("type", "")
+        name = att.get("name", "file")
+        raw = att.get("data", "")
+        mime = att.get("mime", "")
+
+        if att_type == "image":
+            image_parts.append({"type": "image_url", "image_url": {"url": raw}})
+        else:
+            # Determine whether this file can be inlined as text
+            ext = ("." + name.rsplit(".", 1)[-1].lower()) if "." in name else ""
+            is_text = mime in _TEXT_MIME_TYPES or ext in _TEXT_EXTENSIONS
+            if is_text:
+                try:
+                    # Strip data-URI prefix if present (e.g. "data:text/csv;base64,...")
+                    payload = raw.split(",", 1)[1] if "," in raw else raw
+                    decoded = base64.b64decode(payload).decode("utf-8", errors="replace")
+                    text_prefix += f"[Attached file: {name}]\n{decoded}\n\n"
+                except Exception:
+                    text_prefix += f"[Attached file: {name} — could not decode]\n\n"
+            else:
+                text_prefix += f"[Attached file: {name} (binary, not inlined)]\n\n"
+
+    content: list[dict] = [{"type": "text", "text": text_prefix + text}]
+    content.extend(image_parts)
+    return content
+
+
 async def stream_chat(
     messages: list[dict],
     model_id: Optional[str],
     request_id: str,
+    attachments: Optional[list[dict]] = None,
 ) -> AsyncIterator[str]:
     """
     Async generator yielding SSE-formatted strings.
@@ -67,6 +113,24 @@ async def stream_chat(
 
     # OpenRouter model IDs don't include the "openrouter/" namespace prefix
     openrouter_model_id = requested_model_id.removeprefix("openrouter/")
+
+    # ── Attachment processing ─────────────────────────────────────────────────
+    if attachments:
+        # Size guard: sum of base64 character lengths
+        total_b64_size = sum(len(a.get("data", "")) for a in attachments)
+        if total_b64_size > _ATTACHMENT_SIZE_LIMIT:
+            yield _sse({"type": "error", "message": "Attachments exceed the 20 MB size limit"})
+            return
+
+        # Rebuild messages with multimodal content on the last user turn
+        messages = list(messages)  # work on a copy
+        for i in range(len(messages) - 1, -1, -1):
+            if messages[i]["role"] == "user" and isinstance(messages[i].get("content"), str):
+                messages[i] = {
+                    **messages[i],
+                    "content": _build_multimodal_content(messages[i]["content"], attachments),
+                }
+                break
 
     body = {
         "model": openrouter_model_id,
