@@ -136,16 +136,17 @@ export function useChat() {
             try {
               const event = JSON.parse(raw)
               handleEvent(event, requestId)
-            } catch {
-              // ignore parse errors
+            } catch (parseErr) {
+              console.error('Stream chunk error:', parseErr)
             }
           }
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
+          console.error('Stream error:', err)
           patchMessage(requestId, {
             status: 'error',
-            content: `Connection error: ${err.message}`,
+            content: `Stream error: ${err.message}`,
           })
         }
       } finally {

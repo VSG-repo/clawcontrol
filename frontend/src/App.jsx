@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, Component } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
 import { useWebSocket } from '@/hooks/useWebSocket'
@@ -14,6 +14,58 @@ import Skills from '@/pages/Skills'
 import Prompts from '@/pages/Prompts'
 import Alerts from '@/pages/Alerts'
 import AgentsPage from '@/pages/AgentsPage'
+
+class ErrorBoundary extends Component {
+  state = { error: null }
+
+  static getDerivedStateFromError(error) {
+    return { error }
+  }
+
+  componentDidCatch(error, info) {
+    console.error('React ErrorBoundary:', error, info)
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', height: '100vh', background: '#0D0D0D',
+            color: '#E8E8E8', fontFamily: 'monospace', padding: '2rem', gap: '1.5rem',
+          }}
+        >
+          <div
+            style={{
+              border: '1px solid #E8472A', borderRadius: '12px',
+              padding: '2rem 2.5rem', maxWidth: '560px', width: '100%',
+              background: '#1A0A0A', textAlign: 'center',
+            }}
+          >
+            <p style={{ color: '#E8472A', fontWeight: 700, fontSize: '1rem', marginBottom: '0.75rem' }}>
+              Something went wrong
+            </p>
+            <p style={{ color: '#999', fontSize: '0.8rem', marginBottom: '1.5rem', wordBreak: 'break-word' }}>
+              {this.state.error.message}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                background: '#E8472A', color: '#fff', border: 'none',
+                borderRadius: '8px', padding: '0.5rem 1.5rem',
+                fontSize: '0.85rem', cursor: 'pointer',
+              }}
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 function ProtectedApp() {
   useWebSocket()
@@ -55,8 +107,10 @@ export default function App() {
   }, [setAuthenticated])
 
   return (
-    <BrowserRouter>
-      {isAuthenticated ? <ProtectedApp /> : <Login />}
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        {isAuthenticated ? <ProtectedApp /> : <Login />}
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

@@ -128,6 +128,7 @@ function CopyButton({ text }) {
 export default function ChatMessage({ msg }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  try {
   if (msg.role === 'user') {
     const atts = msg.attachments ?? []
     const images = atts.filter((a) => a.type === 'image')
@@ -287,4 +288,15 @@ export default function ChatMessage({ msg }) {
       {drawerOpen && <MetadataDrawer msg={msg} />}
     </div>
   )
+  } catch (err) {
+    console.error('ChatMessage render error:', err)
+    return (
+      <div
+        className="mb-4 px-4 py-3 rounded-xl text-sm"
+        style={{ border: '1px solid #E8472A', background: '#1A0A0A', color: '#E05252' }}
+      >
+        Failed to render message
+      </div>
+    )
+  }
 }
