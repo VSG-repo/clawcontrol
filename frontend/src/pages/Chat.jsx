@@ -584,24 +584,7 @@ export default function Chat() {
             >
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <svg width="80" height="80" viewBox="0 0 80 80" className="mb-4" style={{ opacity: 0.5 }}>
-                    {/* Left talon — fans slightly left, hooks left at tip */}
-                    <path
-                      d="M 23 10 C 27 20, 28 34, 26 52 C 25 62, 22 68, 18 72 C 16 65, 17 56, 18 50 C 20 34, 20 20, 23 10 Z"
-                      fill="#E8472A"
-                    />
-                    {/* Middle talon — tallest, nearly vertical */}
-                    <path
-                      d="M 40 7 C 44 18, 45 34, 44 54 C 43 64, 42 70, 40 76 C 38 70, 37 64, 36 54 C 35 34, 36 18, 40 7 Z"
-                      fill="#E8472A"
-                    />
-                    {/* Right talon — fans slightly right, hooks right at tip */}
-                    <path
-                      d="M 57 10 C 53 20, 52 34, 54 52 C 55 62, 58 68, 62 72 C 64 65, 63 56, 62 50 C 60 34, 60 20, 57 10 Z"
-                      fill="#E8472A"
-                    />
-                  </svg>
-                  <p className="text-sm" style={{ color: '#333' }}>
+                  <p className="text-sm" style={{ color: '#666' }}>
                     {sessions.length > 0 ? 'Select a session or start a new thread' : 'Send a message to begin'}
                   </p>
                 </div>

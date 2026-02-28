@@ -191,7 +191,7 @@ export default function ArtifactPane({ message }) {
         className="flex-1 flex items-center justify-center h-full"
         style={{ background: '#0A0A0A', borderLeft: '1px solid #1E1E1E' }}
       >
-        <div className="text-center" style={{ color: '#333' }}>
+        <div className="text-center" style={{ color: '#666' }}>
           <Code2 size={32} className="mx-auto mb-3 opacity-40" />
           <p className="text-sm">Responses with code, tables, or</p>
           <p className="text-sm">structured content render here</p>
