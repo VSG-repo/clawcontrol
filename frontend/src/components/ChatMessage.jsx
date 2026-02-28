@@ -144,7 +144,7 @@ export default function ChatMessage({ msg }) {
                   src={att.data}
                   alt={att.name}
                   className="rounded-lg object-contain"
-                  style={{ maxWidth: 300, maxHeight: 200 }}
+                  style={{ maxWidth: 150, maxHeight: 100 }}
                 />
               ))}
               {files.map((att) => (
