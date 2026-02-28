@@ -78,7 +78,7 @@ def _build_multimodal_content(text: str, attachments: list[dict]):
             try:
                 decoded_bytes = base64.b64decode(payload)
                 decoded = decoded_bytes.decode("utf-8")
-                text_prefix += f"[Attached file: {name}]\n{decoded}\n\n"
+                text_prefix += f"The user attached a file named '{name}' with the following contents:\n---\n{decoded}\n---\n\n"
             except UnicodeDecodeError:
                 text_prefix += f"[Attached file: {name} — binary file, contents not shown]\n\n"
             except Exception:
@@ -86,6 +86,7 @@ def _build_multimodal_content(text: str, attachments: list[dict]):
 
     full_text = text_prefix + text
 
+    print(f"MULTIMODAL RESULT: type={'array' if image_parts else 'string'}, text_preview={full_text[:200]}", flush=True)
     # Only use content array format when there are actual image attachments.
     # Plain string keeps compatibility with non-vision models.
     if not image_parts:
