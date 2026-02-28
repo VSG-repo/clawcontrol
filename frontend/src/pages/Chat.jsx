@@ -143,6 +143,8 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
         reader.onload = (ev) => {
           setAttachments((p) => {
             if (p.length >= 5) return p
+            const isDupe = p.some((a) => a.name === file.name && a.data.length === ev.target.result.length)
+            if (isDupe) return p
             return [...p, {
               id: crypto.randomUUID(),
               type: file.type.startsWith('image/') ? 'image' : 'file',
@@ -160,29 +162,27 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
 
   const handlePaste = (e) => {
     const items = Array.from(e.clipboardData?.items ?? [])
-    const imageItems = items.filter((it) => it.type.startsWith('image/'))
-    if (imageItems.length === 0) return
-    imageItems.forEach((item) => {
-      const file = item.getAsFile()
-      if (!file) return
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        setAttachments((prev) => {
-          if (prev.length >= 5) {
-            showToast('Max 5 attachments per message')
-            return prev
-          }
-          return [...prev, {
-            id: crypto.randomUUID(),
-            type: 'image',
-            name: 'pasted-image.png',
-            data: ev.target.result,
-            mime: file.type || 'image/png',
-          }]
-        })
-      }
-      reader.readAsDataURL(file)
-    })
+    const imageItem = items.find((it) => it.type.startsWith('image/'))
+    if (!imageItem) return
+    const file = imageItem.getAsFile()
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setAttachments((prev) => {
+        if (prev.length >= 5) {
+          showToast('Max 5 attachments per message')
+          return prev
+        }
+        return [...prev, {
+          id: crypto.randomUUID(),
+          type: 'image',
+          name: 'pasted-image.png',
+          data: ev.target.result,
+          mime: file.type || 'image/png',
+        }]
+      })
+    }
+    reader.readAsDataURL(file)
   }
 
   const removeAttachment = (id) => setAttachments((prev) => prev.filter((a) => a.id !== id))
