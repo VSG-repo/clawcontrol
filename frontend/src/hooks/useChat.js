@@ -11,11 +11,12 @@
 import { useState, useCallback, useRef } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 
-function makeUserMsg(text) {
+function makeUserMsg(text, attachments = []) {
   return {
     id: crypto.randomUUID(),
     role: 'user',
     content: text,
+    attachments,
     ts: new Date().toISOString(),
     status: 'done',
   }
@@ -79,7 +80,7 @@ export function useChat() {
         setContextId(effectiveContextId)
       }
 
-      const userMsg = makeUserMsg(text)
+      const userMsg = makeUserMsg(text, opts.attachments ?? [])
       const requestId = crypto.randomUUID()
       const assistantMsg = makeAssistantMsg(requestId)
 
