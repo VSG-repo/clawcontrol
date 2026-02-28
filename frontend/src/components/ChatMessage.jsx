@@ -139,15 +139,26 @@ export default function ChatMessage({ msg }) {
           {/* Attachment previews above text */}
           {(images.length > 0 || files.length > 0) && (
             <div className="flex flex-wrap gap-2 justify-end">
-              {images.map((att) => (
-                <img
-                  key={att.id}
-                  src={att.data}
-                  alt={att.name}
-                  className="rounded-lg object-contain"
-                  style={{ maxWidth: 150, maxHeight: 100 }}
-                />
-              ))}
+              {images.map((att) =>
+                att.data ? (
+                  <img
+                    key={att.id}
+                    src={att.data}
+                    alt={att.name}
+                    className="rounded-lg object-contain"
+                    style={{ maxWidth: 150, maxHeight: 100 }}
+                  />
+                ) : (
+                  <span
+                    key={att.id}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md"
+                    style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#666' }}
+                    title={att.name}
+                  >
+                    📷 {att.name.length > 20 ? att.name.slice(0, 20) + '…' : att.name}
+                  </span>
+                )
+              )}
               {files.map((att) => (
                 <span
                   key={att.id}

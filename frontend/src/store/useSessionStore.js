@@ -28,11 +28,39 @@ function load() {
   }
 }
 
+/** Strip base64 image data before persisting — keeps metadata, drops payload. */
+function sanitizeMessages(messages) {
+  return messages.map((msg) => {
+    if (!msg.attachments?.length) return msg
+    return {
+      ...msg,
+      attachments: msg.attachments.map((att) =>
+        att.type === 'image' && att.data
+          ? { ...att, data: '' }
+          : att
+      ),
+    }
+  })
+}
+
+function sanitizeSessions(sessions) {
+  return sessions.map((s) => ({
+    ...s,
+    messages: sanitizeMessages(s.messages ?? []),
+  }))
+}
+
 function save(sessions) {
+  const payload = sanitizeSessions(sessions)
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions))
-  } catch {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, 10)))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+  } catch (err) {
+    console.warn('localStorage quota exceeded, trimming sessions:', err)
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.slice(0, 5)))
+    } catch {
+      localStorage.removeItem(STORAGE_KEY)
+    }
   }
 }
 
