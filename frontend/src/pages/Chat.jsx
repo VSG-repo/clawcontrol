@@ -584,12 +584,31 @@ export default function Chat() {
             >
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" className="mb-4" style={{ opacity: 0.15 }}>
-                    <path d="M 8 22 C 3 16 1 9 4 3" stroke="#E8472A" strokeWidth="1.9" strokeLinecap="round" />
-                    <path d="M 12 22 C 13 15 11 8 12 2" stroke="#E8472A" strokeWidth="1.9" strokeLinecap="round" />
-                    <path d="M 16 22 C 21 16 23 9 20 3" stroke="#E8472A" strokeWidth="1.9" strokeLinecap="round" />
-                    <line x1="12" y1="20" x2="18" y2="8" stroke="#E8472A" strokeWidth="1.35" strokeLinecap="round" />
-                    <circle cx="12" cy="20" r="1.55" fill="#E8472A" />
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="mb-4" style={{ opacity: 0.5 }}>
+                    {/* Left scratch — shorter */}
+                    <path
+                      d="M 18 68 L 30 16"
+                      stroke="#E8472A"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {/* Middle scratch — longest */}
+                    <path
+                      d="M 32 72 L 48 10"
+                      stroke="#E8472A"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {/* Right scratch — slightly shorter than middle */}
+                    <path
+                      d="M 50 66 L 63 18"
+                      stroke="#E8472A"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                   <p className="text-sm" style={{ color: '#333' }}>
                     {sessions.length > 0 ? 'Select a session or start a new thread' : 'Send a message to begin'}
