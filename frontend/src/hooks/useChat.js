@@ -99,7 +99,6 @@ export function useChat() {
         attachments: opts.attachments ?? [],
       }
 
-      console.log("SEND PAYLOAD:", JSON.stringify({ message: text, context_id: effectiveContextId, model_id: selectedModel, attachments: opts.attachments?.length }))
       try {
         const resp = await fetch('/api/chat/send', {
           method: 'POST',
@@ -113,7 +112,6 @@ export function useChat() {
 
         if (!resp.ok) {
           const errText = await resp.text()
-          console.error("SEND STATUS:", resp.status, errText)
           patchMessage(requestId, { status: 'error', content: `HTTP ${resp.status}: ${errText}` })
           setIsStreaming(false)
           return effectiveContextId
@@ -145,7 +143,6 @@ export function useChat() {
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
-          console.error("SEND ERROR:", err)
           patchMessage(requestId, {
             status: 'error',
             content: `Connection error: ${err.message}`,

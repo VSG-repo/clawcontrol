@@ -73,7 +73,6 @@ def _build_multimodal_content(text: str, attachments: list[dict]):
         if att_type == "image":
             image_parts.append({"type": "image_url", "image_url": {"url": raw}})
         else:
-            print(f"FILE ATTACH: name={name!r}, data_prefix={raw[:80]!r}", flush=True)
             # Strip data-URI prefix before decoding (e.g. "data:text/plain;base64,...")
             payload = raw.split(",", 1)[1] if "," in raw else raw
             try:
