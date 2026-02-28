@@ -118,8 +118,10 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState([])
   const [toast, setToast] = useState(null)
+  const [dragging, setDragging] = useState(false)
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
+  const dragRef = useRef(null)
 
   const showToast = (msg) => {
     setToast(msg)
@@ -185,6 +187,12 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
 
   const removeAttachment = (id) => setAttachments((prev) => prev.filter((a) => a.id !== id))
 
+  const handleDragOver = (e) => { e.preventDefault(); setDragging(true) }
+  const handleDragLeave = (e) => {
+    if (dragRef.current && !dragRef.current.contains(e.relatedTarget)) setDragging(false)
+  }
+  const handleDrop = (e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }
+
   const handleSubmit = (e) => {
     e?.preventDefault()
     if (!text.trim() || isStreaming) return
@@ -223,6 +231,16 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
       <div className="flex items-center gap-2 mb-2">
         <ModelSelector models={models} selected={selectedModel} onSelect={onSelectModel} />
       </div>
+
+      {/* Drop zone — wraps preview strip + input row */}
+      <div
+        ref={dragRef}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className="rounded-xl transition-all"
+        style={dragging ? { border: '2px dashed #E8472A', background: '#1A1A1A', padding: '6px' } : {}}
+      >
 
       {/* Attachment preview strip */}
       {attachments.length > 0 && (
@@ -322,6 +340,7 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
           {isStreaming ? <RotateCcw size={14} className="animate-spin" /> : <Send size={14} />}
         </button>
       </div>
+      </div> {/* end drop zone */}
       <p className="text-xs mt-1.5 px-1" style={{ color: '#2A2A2A' }}>
         Routed via OpenRouter · context persists in thread
       </p>
