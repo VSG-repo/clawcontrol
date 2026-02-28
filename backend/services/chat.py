@@ -21,6 +21,17 @@ import httpx
 OPENCLAW_CONFIG  = os.path.expanduser("~/.openclaw/openclaw.json")
 OPENROUTER_URL   = "https://openrouter.ai/api/v1/chat/completions"
 
+# Vision-capable models (checked against stripped openrouter_model_id, i.e. no "openrouter/" prefix)
+VISION_MODELS: frozenset = frozenset({
+    "openai/gpt-4o",
+    "openai/gpt-4o-mini",
+    "google/gemini-2.0-flash-001",
+    "google/gemini-2.5-pro-preview-06-05",
+    "anthropic/claude-sonnet-4-20250514",
+    "anthropic/claude-opus-4-20250115",
+    "auto",          # openrouter/auto — routes to a capable model automatically
+})
+
 # USD per 1M tokens (input_rate, output_rate)
 _MODEL_RATES: dict[str, tuple[float, float]] = {
     "openrouter/anthropic/claude-sonnet-4.6": (3.0, 15.0),
@@ -86,7 +97,6 @@ def _build_multimodal_content(text: str, attachments: list[dict]):
 
     full_text = text_prefix + text
 
-    print(f"MULTIMODAL RESULT: type={'array' if image_parts else 'string'}, text_preview={full_text[:200]}", flush=True)
     # Only use content array format when there are actual image attachments.
     # Plain string keeps compatibility with non-vision models.
     if not image_parts:
@@ -134,6 +144,37 @@ async def stream_chat(
                     "content": _build_multimodal_content(messages[i]["content"], attachments),
                 }
                 break
+
+    # ── Vision model routing ──────────────────────────────────────────────────
+    has_images = bool(attachments and any(a.get("type") == "image" for a in attachments))
+    auto_switched: bool = False
+    auto_switched_from: Optional[str] = None
+
+    if has_images and openrouter_model_id not in VISION_MODELS:
+        # Current model doesn't support vision — find a configured vision model
+        from services.models import get_model_stack
+        stack = get_model_stack()
+        vision_candidate: Optional[str] = None
+        for m in stack["models"]:
+            stripped = m["model_id"].removeprefix("openrouter/")
+            if stripped in VISION_MODELS:
+                vision_candidate = m["model_id"]
+                break
+
+        if vision_candidate is None:
+            yield _sse({
+                "type": "error",
+                "message": (
+                    "This model doesn't support images. Add a vision-capable model "
+                    "(e.g. gpt-4o, gemini-2.0-flash) in your routing config, or use 'auto'."
+                ),
+            })
+            return
+
+        auto_switched = True
+        auto_switched_from = requested_model_id
+        requested_model_id = vision_candidate
+        openrouter_model_id = vision_candidate.removeprefix("openrouter/")
 
     body = {
         "model": openrouter_model_id,
@@ -213,6 +254,8 @@ async def stream_chat(
                             "requested_model_id": requested_model_id,
                             "failover": failover,
                             "failover_from": failover_from,
+                            "auto_switched": auto_switched,
+                            "auto_switched_from": auto_switched_from,
                         })
 
                     for choice in chunk.get("choices", []):
