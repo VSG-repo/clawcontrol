@@ -171,10 +171,10 @@ export default function Layout({ children }) {
                       <NavLink
                         to={to}
                         className="flex items-center gap-2.5 px-2 py-2 text-base flex-1 min-w-0"
-                        style={{ color: isChatRoute ? '#FFFFFF' : '#666666', fontWeight: isChatRoute ? 500 : 400 }}
+                        style={{ color: isChatRoute ? '#FFFFFF' : '#999999', fontWeight: isChatRoute ? 500 : 400 }}
                         title={label}
-                        onMouseEnter={(e) => { if (!isChatRoute) e.currentTarget.style.color = '#FFF' }}
-                        onMouseLeave={(e) => { if (!isChatRoute) e.currentTarget.style.color = '#666' }}
+                        onMouseEnter={(e) => { if (!isChatRoute) e.currentTarget.style.color = '#CCCCCC' }}
+                        onMouseLeave={(e) => { if (!isChatRoute) e.currentTarget.style.color = '#999999' }}
                       >
                         <Icon size={16} className="flex-shrink-0" />
                         {!collapsed && <span className="truncate">{label}</span>}
@@ -391,15 +391,17 @@ export default function Layout({ children }) {
                   end={to === '/'}
                   className={({ isActive }) =>
                     `flex items-center gap-2.5 px-2 py-2 rounded-md text-base transition-colors ${
-                      isActive ? 'text-white font-medium' : 'hover:text-white'
+                      isActive ? 'text-white font-medium' : ''
                     }`
                   }
                   style={({ isActive }) => ({
                     background: isActive ? '#1A1A1A' : 'transparent',
-                    color: isActive ? '#FFFFFF' : '#666666',
+                    color: isActive ? '#FFFFFF' : '#999999',
                     justifyContent: collapsed ? 'center' : 'flex-start',
                   })}
                   title={label}
+                  onMouseEnter={(e) => { if (e.currentTarget.style.color !== 'rgb(255, 255, 255)') e.currentTarget.style.color = '#CCCCCC' }}
+                  onMouseLeave={(e) => { if (e.currentTarget.style.color !== 'rgb(255, 255, 255)') e.currentTarget.style.color = '#999999' }}
                 >
                   <div className="relative flex-shrink-0">
                     <Icon size={16} />
