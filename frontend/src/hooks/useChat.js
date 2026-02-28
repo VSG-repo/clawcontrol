@@ -68,7 +68,7 @@ export function useChat() {
    */
   const send = useCallback(
     async (text, opts = {}) => {
-      if (!text.trim() || isStreaming) return null
+      if ((!text.trim() && (!opts.attachments || opts.attachments.length === 0)) || isStreaming) return null
 
       // Generate contextId synchronously so session can be created before response
       const effectiveContextId = (opts.newThread || !contextId)
@@ -98,6 +98,7 @@ export function useChat() {
         attachments: opts.attachments ?? [],
       }
 
+      console.log("SEND PAYLOAD:", JSON.stringify({ message: text, context_id: effectiveContextId, model_id: selectedModel, attachments: opts.attachments?.length }))
       try {
         const resp = await fetch('/api/chat/send', {
           method: 'POST',
@@ -110,8 +111,9 @@ export function useChat() {
         })
 
         if (!resp.ok) {
-          const err = await resp.text()
-          patchMessage(requestId, { status: 'error', content: `HTTP ${resp.status}: ${err}` })
+          const errText = await resp.text()
+          console.error("SEND STATUS:", resp.status, errText)
+          patchMessage(requestId, { status: 'error', content: `HTTP ${resp.status}: ${errText}` })
           setIsStreaming(false)
           return effectiveContextId
         }
@@ -142,6 +144,7 @@ export function useChat() {
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
+          console.error("SEND ERROR:", err)
           patchMessage(requestId, {
             status: 'error',
             content: `Connection error: ${err.message}`,
