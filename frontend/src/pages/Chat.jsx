@@ -191,11 +191,11 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
   const handleDragLeave = (e) => {
     if (dragRef.current && !dragRef.current.contains(e.relatedTarget)) setDragging(false)
   }
-  const handleDrop = (e) => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files) }
+  const handleDrop = (e) => { e.preventDefault(); e.stopPropagation(); setDragging(false); addFiles(e.dataTransfer.files) }
 
   const handleSubmit = (e) => {
     e?.preventDefault()
-    if (!text.trim() || isStreaming) return
+    if ((!text.trim() && attachments.length === 0) || isStreaming) return
     onSend(text, attachments)
     setText('')
     setAttachments([])
@@ -329,12 +329,12 @@ function InputBar({ onSend, isStreaming, models, selectedModel, onSelectModel })
         />
         <button
           onClick={handleSubmit}
-          disabled={!text.trim() || isStreaming}
+          disabled={((!text.trim() && attachments.length === 0) || isStreaming)}
           className="flex-shrink-0 p-2 rounded-lg transition-all"
           style={{
-            background: text.trim() && !isStreaming ? '#E8472A' : '#1E1E1E',
-            color: text.trim() && !isStreaming ? '#FFF' : '#444',
-            cursor: text.trim() && !isStreaming ? 'pointer' : 'not-allowed',
+            background: (text.trim() || attachments.length > 0) && !isStreaming ? '#E8472A' : '#1E1E1E',
+            color: (text.trim() || attachments.length > 0) && !isStreaming ? '#FFF' : '#444',
+            cursor: (text.trim() || attachments.length > 0) && !isStreaming ? 'pointer' : 'not-allowed',
           }}
         >
           {isStreaming ? <RotateCcw size={14} className="animate-spin" /> : <Send size={14} />}
