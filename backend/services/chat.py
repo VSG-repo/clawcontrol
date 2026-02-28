@@ -57,11 +57,13 @@ _TEXT_EXTENSIONS = {".txt", ".csv", ".md", ".markdown", ".json", ".xml", ".html"
 _ATTACHMENT_SIZE_LIMIT = 20 * 1024 * 1024  # 20 MB of base64 characters
 
 
-def _build_multimodal_content(text: str, attachments: list[dict]) -> list[dict]:
+def _build_multimodal_content(text: str, attachments: list[dict]):
     """
-    Convert a plain-text user message + attachments into the OpenAI vision
-    content array format.  Text files are inlined into the text part;
-    images become image_url parts.
+    Convert a plain-text user message + attachments into message content.
+    - Text/decodable files: base64-decoded and prepended as text.
+    - Images: added as image_url content parts.
+    - Returns a plain str when there are no image attachments (model compatibility).
+    - Returns a content array (list[dict]) only when image_url parts are present.
     """
     text_prefix = ""
     image_parts: list[dict] = []
@@ -75,21 +77,27 @@ def _build_multimodal_content(text: str, attachments: list[dict]) -> list[dict]:
         if att_type == "image":
             image_parts.append({"type": "image_url", "image_url": {"url": raw}})
         else:
-            # Determine whether this file can be inlined as text
+            # Strip data-URI prefix before decoding (e.g. "data:text/plain;base64,...")
+            payload = raw.split(",", 1)[1] if "," in raw else raw
             ext = ("." + name.rsplit(".", 1)[-1].lower()) if "." in name else ""
             is_text = mime in _TEXT_MIME_TYPES or ext in _TEXT_EXTENSIONS
             if is_text:
                 try:
-                    # Strip data-URI prefix if present (e.g. "data:text/csv;base64,...")
-                    payload = raw.split(",", 1)[1] if "," in raw else raw
                     decoded = base64.b64decode(payload).decode("utf-8", errors="replace")
                     text_prefix += f"[Attached file: {name}]\n{decoded}\n\n"
                 except Exception:
-                    text_prefix += f"[Attached file: {name} — could not decode]\n\n"
+                    text_prefix += f"[Attached file: {name} — binary file, contents not shown]\n\n"
             else:
-                text_prefix += f"[Attached file: {name} (binary, not inlined)]\n\n"
+                text_prefix += f"[Attached file: {name} — binary file, contents not shown]\n\n"
 
-    content: list[dict] = [{"type": "text", "text": text_prefix + text}]
+    full_text = text_prefix + text
+
+    # Only use content array format when there are actual image attachments.
+    # Plain string keeps compatibility with non-vision models.
+    if not image_parts:
+        return full_text
+
+    content: list[dict] = [{"type": "text", "text": full_text}]
     content.extend(image_parts)
     return content
 
