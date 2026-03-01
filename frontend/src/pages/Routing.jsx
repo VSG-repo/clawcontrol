@@ -507,7 +507,7 @@ export default function Routing() {
             </div>
           </div>
 
-          <p className="text-xs mb-3" style={{ color: '#666' }}>
+          <p className="text-sm mb-3" style={{ color: '#888' }}>
             Automatically route messages to specialized models based on detected intent. Rules are evaluated in priority order — first match wins. Disabled by default; single-model users are unaffected.
           </p>
 
@@ -528,11 +528,11 @@ export default function Routing() {
           >
             {/* Header */}
             <div
-              className="grid text-xs font-semibold px-3 py-2"
+              className="grid text-sm font-semibold px-3 py-2"
               style={{
                 gridTemplateColumns: '40px 1fr 2fr',
                 background: '#111',
-                color: '#666',
+                color: '#888',
                 borderBottom: '1px solid #2A2A2A',
               }}
             >
@@ -551,10 +551,10 @@ export default function Routing() {
                   borderBottom: idx < intentRules.length - 1 ? '1px solid #1E1E1E' : 'none',
                 }}
               >
-                <span className="text-xs font-mono" style={{ color: '#555' }}>{rule.priority}</span>
+                <span className="text-sm font-mono" style={{ color: '#777' }}>{rule.priority}</span>
                 <div>
-                  <div className="text-sm" style={{ color: '#DDD' }}>{rule.label}</div>
-                  <div className="text-xs mt-0.5" style={{ color: '#555' }}>{rule.description}</div>
+                  <div className="text-sm" style={{ color: '#EEE' }}>{rule.label}</div>
+                  <div className="text-sm mt-0.5" style={{ color: '#777' }}>{rule.description}</div>
                 </div>
                 <input
                   type="text"
@@ -563,7 +563,7 @@ export default function Routing() {
                     r.id === rule.id ? { ...r, target_model: e.target.value } : r
                   ))}
                   disabled={!intentEnabled}
-                  className="text-xs px-2 py-1.5 rounded-md w-full font-mono"
+                  className="text-sm px-2 py-1.5 rounded-md w-full font-mono"
                   style={{
                     background: '#0D0D0D',
                     border: '1px solid #2A2A2A',
