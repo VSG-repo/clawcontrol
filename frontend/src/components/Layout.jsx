@@ -303,9 +303,9 @@ export default function Layout({ children }) {
                                         setMenuOpenId(session.id)
                                       }}
                                       className="flex-shrink-0 flex items-center justify-center rounded"
-                                      style={{ width: '20px', height: '20px', color: isMenuOpen ? '#CCC' : '#555', marginRight: '3px' }}
+                                      style={{ width: '20px', height: '20px', color: isMenuOpen ? '#CCC' : '#888', marginRight: '3px' }}
                                       onMouseEnter={(e) => (e.currentTarget.style.color = '#CCC')}
-                                      onMouseLeave={(e) => (e.currentTarget.style.color = isMenuOpen ? '#CCC' : '#555')}
+                                      onMouseLeave={(e) => (e.currentTarget.style.color = isMenuOpen ? '#CCC' : '#888')}
                                       title="More options"
                                     >
                                       <MoreHorizontal size={12} />
