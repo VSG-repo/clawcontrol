@@ -55,7 +55,7 @@ def _journal_logs(
     cmd = [
         "journalctl", f"_PID={pid}",
         "--no-pager", "--output", "json",
-        "-n", str(min(limit * 4, 4000)),
+        "-n", str(min(limit * 6, 6000)),
     ]
     if since:
         cmd += ["--since", since.strftime("%Y-%m-%d %H:%M:%S UTC")]
@@ -145,12 +145,13 @@ def _audit_logs(
 
 
 def get_logs(
-    limit: int = 500,
+    limit: int = 200,
+    offset: int = 0,
     level: Optional[str] = None,  # INFO | WARN | ERROR | None=all
     search: Optional[str] = None,
     since_iso: Optional[str] = None,
     sources: str = "gateway,audit",
-) -> list[dict]:
+) -> dict:
     since: Optional[datetime] = None
     if since_iso:
         try:
@@ -163,7 +164,7 @@ def get_logs(
 
     all_entries: list[dict] = []
     if "gateway" in sources:
-        all_entries += _journal_logs(limit, level_filter, search, since)
+        all_entries += _journal_logs(limit + offset, level_filter, search, since)
     if "audit" in sources:
         # Don't filter audit logs by level — they're always INFO context
         audit = _audit_logs(search, since)
@@ -171,4 +172,12 @@ def get_logs(
             all_entries += audit
 
     all_entries.sort(key=lambda e: e["ts"])
-    return all_entries[-limit:]
+    total = len(all_entries)
+    page = all_entries[offset:offset + limit]
+    return {
+        "logs": page,
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "has_more": (offset + limit) < total,
+    }

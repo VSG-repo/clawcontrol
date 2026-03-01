@@ -91,9 +91,12 @@ const TIME_RANGES = [
   { label: 'All', hours: null },
 ]
 
+const PAGE_SIZE = 200
+
 function LogsTab({ authToken }) {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [level, setLevel] = useState('ALL')
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
@@ -102,7 +105,9 @@ function LogsTab({ authToken }) {
   const [liveMode, setLiveMode] = useState(true)
   const [isPaused, setIsPaused] = useState(false)
   const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
 
+  const offsetRef = useRef(0)
   const listRef = useRef(null)
   const atBottomRef = useRef(true)
 
@@ -114,17 +119,32 @@ function LogsTab({ authToken }) {
   const sourcesParam = () =>
     Object.entries(sources).filter(([, v]) => v).map(([k]) => k).join(',') || 'gateway'
 
-  const fetchLogs = useCallback(async () => {
+  const fetchLogs = useCallback(async (append = false) => {
     if (!authToken) return
-    setLoading(true)
+    const offset = append ? offsetRef.current : 0
+    if (append) setLoadingMore(true)
+    else setLoading(true)
     try {
-      const params = new URLSearchParams({ level, search, limit: '500', since: sinceIso(), sources: sourcesParam() })
+      const params = new URLSearchParams({ level, search, limit: String(PAGE_SIZE), offset: String(offset), since: sinceIso(), sources: sourcesParam() })
       const r = await fetch(`/api/logs?${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
       const data = await r.json()
-      setLogs(data.logs || [])
+      const newLogs = data.logs || []
+      if (append) {
+        setLogs(prev => [...prev, ...newLogs])
+        offsetRef.current = offset + newLogs.length
+      } else {
+        setLogs(newLogs)
+        offsetRef.current = newLogs.length
+      }
       setTotal(data.total || 0)
-    } catch { /* keep existing */ } finally { setLoading(false) }
+      setHasMore(data.has_more || false)
+    } catch { /* keep existing */ } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
   }, [authToken, level, search, timeRange, sources]) // eslint-disable-line
+
+  const loadMore = useCallback(() => fetchLogs(true), [fetchLogs])
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
 
@@ -252,12 +272,25 @@ function LogsTab({ authToken }) {
           ? <div className="flex items-center justify-center h-48 text-sm" style={{ color: '#444' }}>{loading ? 'Loading logs…' : 'No log entries match your filters'}</div>
           : logs.map(entry => <LogRow key={entry.id} entry={entry} search={search} />)
         }
+        {hasMore && (
+          <div className="flex justify-center py-3 border-t" style={{ borderColor: '#1A1A1A' }}>
+            <button
+              onClick={loadMore}
+              disabled={loadingMore}
+              className="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-md transition-colors"
+              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: loadingMore ? '#444' : '#999' }}
+            >
+              <RefreshCw size={11} className={loadingMore ? 'animate-spin' : ''} />
+              {loadingMore ? 'Loading…' : 'Load More'}
+            </button>
+          </div>
+        )}
         <div id="log-bottom" />
       </div>
 
       <div className="flex items-center justify-between mt-2 flex-shrink-0">
         <span className="text-sm" style={{ color: '#444' }}>
-          Showing {logs.length} of {total} entries · {timeRange.label} window
+          Showing {logs.length} of {total} · {timeRange.label} window
         </span>
         {!atBottomRef.current && (
           <button onClick={() => { listRef.current.scrollTop = listRef.current.scrollHeight; atBottomRef.current = true }}
