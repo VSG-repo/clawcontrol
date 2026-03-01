@@ -13,16 +13,17 @@ if ! lsof -ti:3000 >/dev/null 2>&1; then
   sleep 3
 fi
 
-# Open in app mode (standalone window, no browser chrome)
-# Try common browser paths
-if command -v google-chrome &>/dev/null; then
-  google-chrome --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
-elif command -v google-chrome-stable &>/dev/null; then
-  google-chrome-stable --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
-elif command -v chromium-browser &>/dev/null; then
-  chromium-browser --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
-elif command -v microsoft-edge &>/dev/null; then
-  microsoft-edge --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
+# Open as standalone app window
+CHROME=""
+for cmd in google-chrome google-chrome-stable chromium-browser chromium microsoft-edge; do
+  if command -v "$cmd" &>/dev/null; then
+    CHROME="$cmd"
+    break
+  fi
+done
+
+if [ -n "$CHROME" ]; then
+  "$CHROME" --app=http://localhost:3000 --no-first-run --no-default-browser-check --user-data-dir="$HOME/.config/clawcontrol-browser" 2>/dev/null &
 else
   xdg-open http://localhost:3000 &
 fi
