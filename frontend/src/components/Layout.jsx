@@ -338,9 +338,9 @@ export default function Layout({ children }) {
                               {/* Rename */}
                               <button
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left"
-                                style={{ color: '#888' }}
+                                style={{ color: '#AAA' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.background = '#222'; e.currentTarget.style.color = '#CCC' }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#888' }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#AAA' }}
                                 onClick={() => {
                                   const s = sessions.find((s) => s.id === menuOpenId)
                                   if (s) { setRenameValue(s.title || ''); setRenamingId(s.id) }
@@ -354,9 +354,9 @@ export default function Layout({ children }) {
                               {/* Pin / Unpin */}
                               <button
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left"
-                                style={{ color: '#888' }}
+                                style={{ color: '#AAA' }}
                                 onMouseEnter={(e) => { e.currentTarget.style.background = '#222'; e.currentTarget.style.color = '#CCC' }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#888' }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#AAA' }}
                                 onClick={() => { togglePin(menuOpenId); setMenuOpenId(null) }}
                               >
                                 <Pin size={11} />
