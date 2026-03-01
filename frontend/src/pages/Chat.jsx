@@ -367,7 +367,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
         )}
       </div>
       </div> {/* end drop zone */}
-      <p className="text-xs mt-1.5 px-1" style={{ color: '#2A2A2A' }}>
+      <p className="text-xs mt-1.5 px-1" style={{ color: '#444' }}>
         Routed via OpenRouter · context persists in thread
       </p>
     </div>

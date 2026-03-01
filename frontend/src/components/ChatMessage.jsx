@@ -326,7 +326,7 @@ export default function ChatMessage({ msg }) {
       {msg.status === 'done' && (
         <div
           className="flex items-center gap-3 mt-1.5 px-1 text-xs"
-          style={{ color: '#444' }}
+          style={{ color: '#666' }}
         >
           <span>{msg.token_estimate != null ? `${msg.token_estimate} tok` : ''}</span>
           <span>·</span>
