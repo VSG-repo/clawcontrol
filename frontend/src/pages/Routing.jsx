@@ -295,7 +295,7 @@ export default function Routing() {
                     className="flex items-center justify-between gap-3 px-3 py-2 rounded-md cursor-pointer"
                     style={{ background: '#111', border: '1px solid #222' }}
                   >
-                    <span className="text-xs" style={{ color: '#DDD' }}>{modelLabel(m.model_id, orderedModels)}</span>
+                    <span className="text-sm" style={{ color: '#DDD' }}>{modelLabel(m.model_id, orderedModels)}</span>
                     <input
                       type="checkbox"
                       checked={checked}
@@ -411,7 +411,7 @@ export default function Routing() {
                 className="flex items-center justify-between px-3 py-2 rounded-md"
                 style={{ background: '#111', border: '1px solid #222' }}
               >
-                <span className="text-xs" style={{ color: '#DDD' }}>{modelLabel(m.model_id, modelHealth)}</span>
+                <span className="text-sm" style={{ color: '#DDD' }}>{modelLabel(m.model_id, modelHealth)}</span>
                 <div className="flex items-center gap-2">
                   <div
                     className="w-2 h-2 rounded-full"

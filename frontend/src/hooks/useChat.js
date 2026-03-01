@@ -24,17 +24,17 @@ function makeUserMsg(text, attachments = []) {
   }
 }
 
-function makeAssistantMsg(requestId) {
+function makeAssistantMsg(requestId, requestedModelId = null) {
   return {
     id: requestId,
     role: 'assistant',
     content: '',
     ts: new Date().toISOString(),
     status: 'streaming',
-    model: null,
-    model_id: null,
+    model: requestedModelId ? requestedModelId.split('/').pop() : null,
+    model_id: requestedModelId,
     tier: null,
-    requested_model_id: null,
+    requested_model_id: requestedModelId,
     failover: false,
     failover_from: null,
     latency_ms: null,
@@ -84,7 +84,7 @@ export function useChat() {
 
       const userMsg = makeUserMsg(text, opts.attachments ?? [])
       const requestId = crypto.randomUUID()
-      const assistantMsg = makeAssistantMsg(requestId)
+      const assistantMsg = makeAssistantMsg(requestId, selectedModel)
 
       setMessages((prev) => [
         ...(opts.newThread ? [] : prev),
@@ -196,14 +196,16 @@ export function useChat() {
         )
         break
 
-      case 'done':
+      case 'done': {
+        const doneModelId = event.model_id || null
         setMessages((prev) =>
           prev.map((m) => {
             if (m.id === (event.id || requestId)) {
               return {
                 ...m,
                 status: 'done',
-                model_id: event.model_id,
+                model_id: doneModelId ?? m.model_id,
+                model: doneModelId ? doneModelId.split('/').pop() : m.model,
                 failover: event.failover,
                 failover_from: event.failover_from,
                 finish_reason: event.finish_reason,
@@ -222,6 +224,7 @@ export function useChat() {
         setSessionTokens((t) => t + (event.token_estimate ?? 0))
         dbg.addEntry('success', 'sse', `done — ${event.token_estimate ?? 0} tok, $${(event.cost_estimate_usd ?? 0).toFixed(6)}, ${event.latency_ms ?? 0}ms`)
         break
+      }
 
       case 'error':
         dbg.addEntry('error', 'sse', `error: ${event.message}`, event.detail ?? null)
