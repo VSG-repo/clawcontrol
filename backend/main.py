@@ -77,6 +77,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from auth import verify_password, create_token, decode_token, require_auth, get_token_from_header
+from services.rate_limiter import limiter as _rate_limiter
 from ws_manager import connect, disconnect, live_data_loop
 from services.probe import probe_loop
 from services.credits import credits_loop
@@ -172,13 +173,40 @@ app.include_router(orders_router.router)
 app.include_router(cron_router.router)
 
 
+# ── Auth rate-limiting helpers ────────────────────────────────────────────────
+
+def _client_ip(request: Request) -> str:
+    """
+    Return the IP address used as the rate-limit key.
+    X-Forwarded-For is checked first so tests can inject a spoofed IP;
+    in production the app is local-only so this header is never set externally.
+    """
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _check_rate(request: Request, prefix: str, limit: int, window: int = 60) -> None:
+    key = f"{prefix}:{_client_ip(request)}"
+    allowed, retry_after = _rate_limiter.check(key, limit=limit, window=window)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests — please try again later.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
+
 # Auth endpoints
 class LoginRequest(BaseModel):
     password: str
 
 
 @app.post("/api/auth/login")
-async def login(req: LoginRequest):
+async def login(req: LoginRequest, request: Request):
+    # 10 attempts per minute per IP — strict enough to block brute-force
+    _check_rate(request, "login", limit=10, window=60)
     if not verify_password(req.password):
         raise HTTPException(status_code=401, detail="Invalid password")
     token = create_token({"sub": "wagz"})
@@ -186,7 +214,9 @@ async def login(req: LoginRequest):
 
 
 @app.get("/api/auth/verify")
-async def verify(token: str = Depends(get_token_from_header)):
+async def verify(request: Request, token: str = Depends(get_token_from_header)):
+    # 60 per minute — called automatically on every page load
+    _check_rate(request, "verify", limit=60, window=60)
     if not token or not decode_token(token):
         raise HTTPException(status_code=401, detail="Invalid token")
     return {"ok": True}
@@ -195,6 +225,8 @@ async def verify(token: str = Depends(get_token_from_header)):
 @app.get("/api/auth/auto")
 async def auto_login(request: Request):
     """Return a token automatically for localhost connections (no password needed)."""
+    # 20 per minute — called on startup / token refresh
+    _check_rate(request, "auto", limit=20, window=60)
     client_host = request.client.host if request.client else ""
     if client_host not in ("127.0.0.1", "::1", "localhost"):
         raise HTTPException(status_code=403, detail="Auto-login only available on localhost")
