@@ -42,7 +42,7 @@ function loadDismissed() {
 }
 
 export default function Layout({ children }) {
-  const { wsConnected, clearAuth, authToken } = useWagzStore()
+  const { wsConnected, wsReconnecting, wsGaveUp, clearAuth, authToken } = useWagzStore()
   const toggleDebug = useDebugStore((s) => s.toggle)
   const debugOpen = useDebugStore((s) => s.open)
   const location = useLocation()
@@ -451,14 +451,14 @@ export default function Layout({ children }) {
           <div
             className="flex items-center gap-2 px-2 py-1.5"
             style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
-            title={wsConnected ? 'WebSocket live' : 'WebSocket disconnected'}
+            title={wsConnected ? 'WebSocket live' : wsReconnecting ? 'WebSocket reconnecting…' : 'WebSocket disconnected'}
           >
             {wsConnected
               ? <Wifi size={13} color="#E8472A" />
-              : <WifiOff size={13} color="#E05252" />}
+              : <WifiOff size={13} color={wsReconnecting ? '#E0A020' : '#E05252'} />}
             {!collapsed && (
-              <span className="text-xs" style={{ color: wsConnected ? '#E8472A' : '#E05252' }}>
-                {wsConnected ? 'Live' : 'Disconnected'}
+              <span className="text-xs" style={{ color: wsConnected ? '#E8472A' : wsReconnecting ? '#E0A020' : '#E05252' }}>
+                {wsConnected ? 'Live' : wsReconnecting ? 'Reconnecting…' : 'Disconnected'}
               </span>
             )}
           </div>
@@ -504,6 +504,23 @@ export default function Layout({ children }) {
 
       {/* Debug panel — fixed overlay, manages its own open state */}
       <DebugPanel />
+
+      {/* WS gave-up toast */}
+      {wsGaveUp && (
+        <div
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm"
+          style={{ background: '#1A0A0A', border: '1px solid #E0525250', color: '#E05252', boxShadow: '0 4px 24px rgba(0,0,0,0.7)' }}
+        >
+          WebSocket disconnected. Reload to reconnect.
+          <button
+            onClick={() => window.location.reload()}
+            className="px-2.5 py-1 rounded text-xs font-medium"
+            style={{ background: '#E0525225', border: '1px solid #E0525240' }}
+          >
+            Reload
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -4,6 +4,8 @@ export const useWagzStore = create((set, get) => ({
   // WebSocket state
   wsConnected: false,
   wsRetryCount: 0,
+  wsReconnecting: false,
+  wsGaveUp: false,
 
   // Gateway status
   gatewayStatus: 'unknown', // 'online' | 'offline' | 'restarting' | 'unknown'
@@ -56,8 +58,10 @@ export const useWagzStore = create((set, get) => ({
   authToken: null,
 
   // Actions
-  setWsConnected: (connected) => set({ wsConnected: connected }),
-  setWsRetryCount: (count) => set({ wsRetryCount: count }),
+  setWsConnected:    (v) => set({ wsConnected: v }),
+  setWsRetryCount:   (v) => set({ wsRetryCount: v }),
+  setWsReconnecting: (v) => set({ wsReconnecting: v }),
+  setWsGaveUp:       (v) => set({ wsGaveUp: v }),
   setAuthenticated: (token) => set({ isAuthenticated: true, authToken: token }),
   clearAuth: () => set({ isAuthenticated: false, authToken: null }),
 
