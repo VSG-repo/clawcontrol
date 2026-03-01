@@ -125,8 +125,34 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
+
+
+@app.middleware("http")
+async def csrf_middleware(request: Request, call_next):
+    """
+    Require X-Requested-With: XMLHttpRequest on all mutating requests.
+    Exemptions:
+      - GET / HEAD / OPTIONS (safe methods)
+      - Localhost clients (already trusted by require_auth)
+      - WebSocket upgrades
+    """
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return await call_next(request)
+
+    client_host = request.client.host if request.client else ""
+    if client_host in ("127.0.0.1", "::1", "localhost"):
+        return await call_next(request)
+
+    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "CSRF check failed: missing X-Requested-With header"},
+        )
+
+    return await call_next(request)
 
 # Routers
 app.include_router(status_router.router)

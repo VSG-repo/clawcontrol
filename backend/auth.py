@@ -13,7 +13,7 @@ from passlib.context import CryptContext
 
 SECRET_KEY = os.getenv("WAGZ_SECRET_KEY", "changeme-set-in-env")
 ALGORITHM = "HS256"
-TOKEN_EXPIRE_HOURS = 24 * 7  # 1 week
+TOKEN_EXPIRE_HOURS = 24  # 24 hours
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer(auto_error=False)
