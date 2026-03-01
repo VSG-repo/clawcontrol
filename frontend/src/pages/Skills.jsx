@@ -8,9 +8,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
-import { API_BASE } from '@/config'
   Puzzle, ExternalLink, FolderOpen, FileText, RefreshCw, ChevronDown, ChevronRight,
 } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 const CLAWHUB_URL = 'https://clawhub.com'
 const GITHUB_URL  = 'https://github.com/openclaw-skills'

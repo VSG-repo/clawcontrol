@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
-import { API_BASE } from '@/config'
   FileText, Send, Download, Tag, Plus, Trash2, Save,
   Braces, RotateCcw, ChevronDown, X, FolderOpen, Code,
 } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

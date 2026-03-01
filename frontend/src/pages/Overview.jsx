@@ -13,10 +13,10 @@ import { useNavigate } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
 import { detectAlerts } from '@/services/alertDetector'
 import {
-import { API_BASE } from '@/config'
   RefreshCw, ArrowRight, Circle, Cpu, DollarSign,
   CheckCircle2, XCircle, Clock, Activity,
 } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

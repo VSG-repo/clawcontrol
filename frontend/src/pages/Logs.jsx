@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
-import { API_BASE } from '@/config'
   Search, Download, RefreshCw, Pause, Play,
   AlertCircle, AlertTriangle, Info, Filter, ChevronDown,
   CheckCircle, XCircle, Clock, Cpu, Send, Activity,
   GitBranch, Zap, RotateCcw,
 } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TAB 1 — LOGS (original, untouched)
