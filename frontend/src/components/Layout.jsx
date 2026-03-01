@@ -137,13 +137,14 @@ export default function Layout({ children }) {
             onMouseEnter={(e) => { e.currentTarget.style.color = '#888'; e.currentTarget.style.background = '#1A1A1A' }}
             onMouseLeave={(e) => { e.currentTarget.style.color = '#444'; e.currentTarget.style.background = 'transparent' }}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <Menu size={14} />
           </button>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-2 px-2 overflow-hidden flex flex-col">
+        <nav className="flex-1 py-2 px-2 overflow-hidden flex flex-col" aria-label="Main navigation">
           <div className="space-y-0.5">
             {NAV.map(({ to, label, icon: Icon, disabled }) => {
               if (disabled) {
@@ -452,6 +453,9 @@ export default function Layout({ children }) {
             className="flex items-center gap-2 px-2 py-1.5"
             style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
             title={wsConnected ? 'WebSocket live' : wsReconnecting ? 'WebSocket reconnecting…' : 'WebSocket disconnected'}
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={wsConnected ? 'WebSocket live' : wsReconnecting ? 'WebSocket reconnecting' : 'WebSocket disconnected'}
           >
             {wsConnected
               ? <Wifi size={13} color="#E8472A" />
@@ -474,6 +478,8 @@ export default function Layout({ children }) {
             onMouseEnter={(e) => { e.currentTarget.style.color = '#E8472A' }}
             onMouseLeave={(e) => { e.currentTarget.style.color = debugOpen ? '#E8472A' : '#555555' }}
             title="Toggle debug console"
+            aria-label="Toggle debug console"
+            aria-pressed={debugOpen}
           >
             <Bug size={14} className="flex-shrink-0" />
             {!collapsed && <span className="text-xs">Debug</span>}
@@ -490,6 +496,7 @@ export default function Layout({ children }) {
             onMouseEnter={(e) => { e.currentTarget.style.color = '#E05252' }}
             onMouseLeave={(e) => { e.currentTarget.style.color = '#666666' }}
             title="Logout"
+            aria-label="Log out"
           >
             <LogOut size={16} className="flex-shrink-0" />
             {!collapsed && <span>Logout</span>}
@@ -508,6 +515,7 @@ export default function Layout({ children }) {
       {/* WS gave-up toast */}
       {wsGaveUp && (
         <div
+          role="alert"
           className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm"
           style={{ background: '#1A0A0A', border: '1px solid #E0525250', color: '#E05252', boxShadow: '0 4px 24px rgba(0,0,0,0.7)' }}
         >

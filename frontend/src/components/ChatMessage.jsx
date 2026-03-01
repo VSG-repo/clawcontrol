@@ -119,6 +119,7 @@ function CopyButton({ text }) {
       onMouseEnter={(e) => (e.currentTarget.style.color = '#888')}
       onMouseLeave={(e) => (e.currentTarget.style.color = '#444')}
       title="Copy response"
+      aria-label={copied ? 'Copied' : 'Copy response'}
     >
       {copied ? <Check size={12} color="#E8472A" /> : <Copy size={12} />}
     </button>
@@ -252,6 +253,8 @@ export default function ChatMessage({ msg }) {
               onMouseEnter={(e) => (e.currentTarget.style.color = '#888')}
               onMouseLeave={(e) => (e.currentTarget.style.color = '#444')}
               title="Toggle metadata"
+              aria-label={drawerOpen ? 'Hide metadata' : 'Show metadata'}
+              aria-expanded={drawerOpen}
             >
               {drawerOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>

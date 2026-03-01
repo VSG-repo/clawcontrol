@@ -264,6 +264,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
                 />
                 <button
                   onClick={() => removeAttachment(att.id)}
+                  aria-label={`Remove ${att.name}`}
                   className="absolute flex items-center justify-center"
                   style={{
                     top: -4, right: -4, width: 16, height: 16, borderRadius: '50%',
@@ -284,6 +285,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
                 </span>
                 <button
                   onClick={() => removeAttachment(att.id)}
+                  aria-label={`Remove ${att.name}`}
                   style={{ color: '#555', flexShrink: 0 }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#E8472A')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
@@ -310,6 +312,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
           onMouseEnter={(e) => (e.currentTarget.style.color = '#E8472A')}
           onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
           title="Attach file"
+          aria-label="Attach file"
         >
           <Paperclip size={14} />
         </button>
@@ -330,6 +333,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
           onPaste={handlePaste}
           placeholder="Message… (Enter to send, Shift+Enter for newline)"
           rows={1}
+          aria-label="Message input"
           className="flex-1 resize-none bg-transparent text-sm outline-none"
           style={{ color: '#E8E8E8', lineHeight: '1.5', minHeight: '24px', maxHeight: '160px' }}
         />
@@ -339,6 +343,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
             className="flex-shrink-0 p-2 rounded-lg transition-all"
             style={{ background: '#E8472A', color: '#FFF', cursor: 'pointer' }}
             title="Stop generation"
+            aria-label="Stop generation"
           >
             <Square size={14} fill="#FFF" />
           </button>
@@ -346,6 +351,7 @@ function InputBar({ onSend, onStop, isStreaming, models, selectedModel, onSelect
           <button
             onClick={handleSubmit}
             disabled={!text.trim() && attachments.length === 0}
+            aria-label="Send message"
             className="flex-shrink-0 p-2 rounded-lg transition-all"
             style={{
               background: (text.trim() || attachments.length > 0) ? '#E8472A' : '#1E1E1E',
@@ -580,6 +586,9 @@ export default function Chat() {
             <div
               ref={scrollRef}
               className="flex-1 overflow-y-auto px-4 py-4"
+              role="log"
+              aria-live="polite"
+              aria-label="Chat messages"
               onMouseEnter={() => { isHovering.current = true }}
               onMouseLeave={() => { isHovering.current = false }}
             >

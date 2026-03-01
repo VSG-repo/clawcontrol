@@ -62,6 +62,7 @@ export default function DebugPanel() {
             onMouseEnter={(e) => (e.currentTarget.style.color = '#888')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#444')}
             title="Clear log"
+            aria-label="Clear log"
           >
             <Trash2 size={12} />
           </button>
@@ -72,6 +73,7 @@ export default function DebugPanel() {
             onMouseEnter={(e) => (e.currentTarget.style.color = '#E8472A')}
             onMouseLeave={(e) => (e.currentTarget.style.color = '#444')}
             title="Close"
+            aria-label="Close debug panel"
           >
             <X size={14} />
           </button>
