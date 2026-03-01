@@ -38,7 +38,7 @@ export default function Login() {
         style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px' }}
       >
         <div className="flex flex-col items-center mb-8 gap-3">
-          <img src="/icon-192.png" alt="ClawControl" style={{ width: 54, height: 54, borderRadius: '12px' }} />
+          <img src="/clawcontrol-icon.png" alt="ClawControl" style={{ width: 54, height: 54, borderRadius: '12px', objectFit: 'cover' }} />
           <div className="text-center">
             <div
               className="font-bold text-white tracking-tight"
