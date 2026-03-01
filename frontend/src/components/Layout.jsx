@@ -266,7 +266,7 @@ export default function Layout({ children }) {
                                       <p
                                         className="text-xs leading-snug"
                                         style={{
-                                          color: isActive ? '#CCC' : '#666',
+                                          color: isActive ? '#CCC' : '#888',
                                           display: '-webkit-box',
                                           WebkitLineClamp: 2,
                                           WebkitBoxOrient: 'vertical',
@@ -278,7 +278,7 @@ export default function Layout({ children }) {
                                       </p>
                                     )}
                                     {!isRenaming && (
-                                      <p className="text-xs mt-0.5" style={{ color: '#333' }}>
+                                      <p className="text-xs mt-0.5" style={{ color: '#555' }}>
                                         {formatAgo(session.ts)}
                                       </p>
                                     )}
