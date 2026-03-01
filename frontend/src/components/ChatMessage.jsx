@@ -115,10 +115,10 @@ function MetadataDrawer({ msg }) {
       <div className="px-3 py-2 space-y-1.5">
         {rows.map(({ label, value }) => (
           <div key={label} className="flex justify-between gap-4">
-            <span style={{ color: '#555' }}>{label}</span>
+            <span style={{ color: '#777' }}>{label}</span>
             <span
               className="font-mono truncate text-right"
-              style={{ color: '#888', maxWidth: '200px' }}
+              style={{ color: '#AAA', maxWidth: '200px' }}
               title={String(value)}
             >
               {String(value)}
