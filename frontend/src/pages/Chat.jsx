@@ -24,6 +24,7 @@ import { useSessionStore } from '@/store/useSessionStore'
 import ChatMessage from '@/components/ChatMessage'
 import ArtifactPane from '@/components/ArtifactPane'
 import { useWagzStore } from '@/store/useWagzStore'
+import { API_BASE } from '@/config'
 
 const TIER_COLORS = {
   T1: '#E8472A',
@@ -429,7 +430,7 @@ export default function Chat() {
 
   // Load models
   useEffect(() => {
-    fetch('/api/chat/models', { headers: { Authorization: `Bearer ${authToken}` } })
+    fetch(`${API_BASE}/chat/models`, { headers: { Authorization: `Bearer ${authToken}` } })
       .then((r) => r.json())
       .then((d) => setModels(d.models ?? []))
       .catch(() => {})

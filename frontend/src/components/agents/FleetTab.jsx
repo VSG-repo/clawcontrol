@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
+import { API_BASE } from '@/config'
   Bot, Plus, RefreshCw, Pencil, Trash2, X, Save, Check,
 } from 'lucide-react'
 
@@ -86,7 +87,7 @@ function PrimaryAgentCard({ agent, authToken, onUpdated, onToast }) {
     if (!trimmed) return
     setSaving(true)
     try {
-      const r = await fetch('/api/agents/primary/name', {
+      const r = await fetch(`${API_BASE}/agents/primary/name`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: trimmed }),
@@ -219,7 +220,7 @@ function CustomAgentCard({ agent, authToken, onUpdated, onToast }) {
   const saveEdit = async () => {
     setSaving(true)
     try {
-      const r = await fetch(`/api/agents/${agent.id}`, {
+      const r = await fetch(`${API_BASE}/agents/${agent.id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -245,7 +246,7 @@ function CustomAgentCard({ agent, authToken, onUpdated, onToast }) {
   const doDelete = async () => {
     setDeleting(true)
     try {
-      const r = await fetch(`/api/agents/${agent.id}`, {
+      const r = await fetch(`${API_BASE}/agents/${agent.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       })
@@ -420,7 +421,7 @@ function NewAgentModal({ authToken, onClose, onCreated }) {
     setSaving(true)
     setError('')
     try {
-      const r = await fetch('/api/agents', {
+      const r = await fetch(`${API_BASE}/agents`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -503,7 +504,7 @@ export default function FleetTab() {
     if (!authToken) return
     setLoading(true)
     try {
-      const r = await fetch('/api/agents', { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/agents`, { headers: { Authorization: `Bearer ${authToken}` } })
       if (!r.ok) return
       const data = await r.json()
       setPrimary(data.primary || null)

@@ -11,6 +11,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import { useDebugStore } from '@/store/useDebugStore'
+import { API_BASE } from '@/config'
 
 function makeUserMsg(text, attachments = []) {
   return {
@@ -102,7 +103,7 @@ export function useChat() {
 
       abortRef.current = new AbortController()
       try {
-        const resp = await fetch('/api/chat/send', {
+        const resp = await fetch(`${API_BASE}/chat/send`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

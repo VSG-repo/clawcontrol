@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
+import { API_BASE } from '@/config'
   Clock, Plus, Pencil, Trash2, X, Save, Lock,
   ToggleLeft, ToggleRight, RefreshCw,
 } from 'lucide-react'
@@ -206,7 +207,7 @@ function EditCronModal({ job, agents, authToken, onClose, onSaved }) {
     setSaving(true)
     setError('')
     try {
-      const r = await fetch(`/api/cron/${job.id}`, {
+      const r = await fetch(`${API_BASE}/cron/${job.id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -321,7 +322,7 @@ function CronJobCard({ job, agentName, agents, authToken, onUpdated, onToast }) 
   const toggle = async () => {
     setToggling(true)
     try {
-      const r = await fetch(`/api/cron/${job.id}/toggle`, {
+      const r = await fetch(`${API_BASE}/cron/${job.id}/toggle`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${authToken}` },
       })
@@ -338,7 +339,7 @@ function CronJobCard({ job, agentName, agents, authToken, onUpdated, onToast }) 
   const doDelete = async () => {
     setDeleting(true)
     try {
-      const r = await fetch(`/api/cron/${job.id}`, {
+      const r = await fetch(`${API_BASE}/cron/${job.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       })
@@ -502,7 +503,7 @@ function NewCronModal({ agents, authToken, onClose, onCreated }) {
     setSaving(true)
     setError('')
     try {
-      const r = await fetch('/api/cron', {
+      const r = await fetch(`${API_BASE}/cron`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -626,8 +627,8 @@ export default function CronTab() {
     setLoading(true)
     try {
       const [cronRes, agentsRes] = await Promise.all([
-        fetch('/api/cron',   { headers: { Authorization: `Bearer ${authToken}` } }),
-        fetch('/api/agents', { headers: { Authorization: `Bearer ${authToken}` } }),
+        fetch(`${API_BASE}/cron`,   { headers: { Authorization: `Bearer ${authToken}` } }),
+        fetch(`${API_BASE}/agents`, { headers: { Authorization: `Bearer ${authToken}` } }),
       ])
       if (cronRes.ok) {
         const d = await cronRes.json()

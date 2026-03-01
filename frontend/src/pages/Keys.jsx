@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
+import { API_BASE } from '@/config'
   Key, Plus, RotateCcw, Shield, ShieldCheck,
   Trash2, RefreshCw, AlertTriangle, Check, X,
 } from 'lucide-react'
@@ -84,7 +85,7 @@ export default function Keys() {
     if (!authToken) return
     setLoading(true)
     try {
-      const r = await fetch('/api/keys', {
+      const r = await fetch(`${API_BASE}/keys`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
       if (!r.ok) throw new Error('Failed to load keys')
@@ -111,7 +112,7 @@ export default function Keys() {
     if (!addProvider || !addKey.trim()) return
     setAddLoading(true)
     try {
-      const r = await fetch('/api/keys', {
+      const r = await fetch(`${API_BASE}/keys`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider: addProvider, key: addKey.trim(), label: addLabel.trim() }),
@@ -135,7 +136,7 @@ export default function Keys() {
     if (!rotateKey.trim()) return
     setRotateLoading(true)
     try {
-      const r = await fetch('/api/keys/rotate', {
+      const r = await fetch(`${API_BASE}/keys/rotate`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ provider, key: rotateKey.trim() }),
@@ -156,7 +157,7 @@ export default function Keys() {
   const handleDelete = async (provider) => {
     setDeleteLoading(true)
     try {
-      const r = await fetch(`/api/keys/${provider}`, {
+      const r = await fetch(`${API_BASE}/keys/${provider}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       })
@@ -175,7 +176,7 @@ export default function Keys() {
   const handleCheck = async (provider) => {
     setChecking(provider)
     try {
-      const r = await fetch(`/api/keys/check/${provider}`, {
+      const r = await fetch(`${API_BASE}/keys/check/${provider}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}` },
       })
@@ -199,7 +200,7 @@ export default function Keys() {
     setCbSaving(true)
     setCbError('')
     try {
-      const r = await fetch('/api/circuit-breaker', {
+      const r = await fetch(`${API_BASE}/circuit-breaker`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: cbEnabled, daily_limit_usd: limit, hard_stop: cbHardStop }),

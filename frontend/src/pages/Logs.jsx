@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
+import { API_BASE } from '@/config'
   Search, Download, RefreshCw, Pause, Play,
   AlertCircle, AlertTriangle, Info, Filter, ChevronDown,
   CheckCircle, XCircle, Clock, Cpu, Send, Activity,
@@ -126,7 +127,7 @@ function LogsTab({ authToken }) {
     else setLoading(true)
     try {
       const params = new URLSearchParams({ level, search, limit: String(PAGE_SIZE), offset: String(offset), since: sinceIso(), sources: sourcesParam() })
-      const r = await fetch(`/api/logs?${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/logs?${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
       const data = await r.json()
       const newLogs = data.logs || []
       if (append) {
@@ -535,7 +536,7 @@ function SessionsTab({ authToken }) {
     setLoading(true)
     try {
       const params = statusFilter ? `?status=${statusFilter}` : ''
-      const r = await fetch(`/api/observe/sessions${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/observe/sessions${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
       const d = await r.json()
       setSessions(d.sessions || [])
     } catch { /* keep */ } finally { setLoading(false) }
@@ -620,7 +621,7 @@ function CronTab({ authToken }) {
     if (!authToken) return
     setLoading(true)
     try {
-      const r = await fetch('/api/observe/cron', { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/observe/cron`, { headers: { Authorization: `Bearer ${authToken}` } })
       const d = await r.json()
       setJobs(d.jobs || [])
     } catch { /* keep */ } finally { setLoading(false) }
@@ -701,7 +702,7 @@ function QueueTab({ authToken }) {
     setLoading(true)
     try {
       const params = statusFilter ? `?status=${statusFilter}` : ''
-      const r = await fetch(`/api/observe/queue${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/observe/queue${params}`, { headers: { Authorization: `Bearer ${authToken}` } })
       const d = await r.json()
       setEvents(d.events || [])
     } catch { /* keep */ } finally { setLoading(false) }
@@ -849,7 +850,7 @@ function ActivityTab({ authToken }) {
     if (!authToken) return
     setLoading(true)
     try {
-      const r = await fetch('/api/observe/activity', { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/observe/activity`, { headers: { Authorization: `Bearer ${authToken}` } })
       setData(await r.json())
       setLastRefresh(new Date())
     } catch { /* keep */ } finally { setLoading(false) }

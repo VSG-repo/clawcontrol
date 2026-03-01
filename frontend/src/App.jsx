@@ -14,6 +14,7 @@ import Skills from '@/pages/Skills'
 import Prompts from '@/pages/Prompts'
 import Alerts from '@/pages/Alerts'
 import AgentsPage from '@/pages/AgentsPage'
+import { API_BASE } from '@/config'
 
 class ErrorBoundary extends Component {
   state = { error: null }
@@ -95,7 +96,7 @@ export default function App() {
   useEffect(() => {
     const token = localStorage.getItem('wagz_token')
     if (token) {
-      fetch('/api/auth/verify', {
+      fetch(`${API_BASE}/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
@@ -114,7 +115,7 @@ export default function App() {
     }
 
     function tryAutoLogin() {
-      fetch('/api/auth/auto')
+      fetch(`${API_BASE}/auth/auto`)
         .then((res) => {
           if (res.ok) return res.json()
           throw new Error('not localhost')

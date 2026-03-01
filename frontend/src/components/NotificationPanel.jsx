@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Bell, X, CheckCheck, AlertCircle, AlertTriangle, Info, Settings, ChevronDown } from 'lucide-react'
 import { useWagzStore } from '@/store/useWagzStore'
+import { API_BASE } from '@/config'
 
 const LEVEL_CONFIG = {
   error: { icon: AlertCircle, color: '#E05252', bg: '#E0525215', border: '#E0525240' },
@@ -48,14 +49,14 @@ function SettingsPanel({ token, onClose }) {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    fetch('/api/notifications/settings', { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API_BASE}/notifications/settings`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json()).then(setSettings).catch(() => {})
   }, [token])
 
   const save = async () => {
     setSaving(true)
     try {
-      await fetch('/api/notifications/settings', {
+      await fetch(`${API_BASE}/notifications/settings`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
@@ -120,7 +121,7 @@ export default function NotificationPanel({ collapsed = false }) {
   useEffect(() => {
     if (!open || !authToken) return
     const load = () => {
-      fetch('/api/notifications', { headers: { Authorization: `Bearer ${authToken}` } })
+      fetch(`${API_BASE}/notifications`, { headers: { Authorization: `Bearer ${authToken}` } })
         .then(r => r.json())
         .then(d => setNotifications(d.notifications || []))
         .catch(() => {})
@@ -140,14 +141,14 @@ export default function NotificationPanel({ collapsed = false }) {
   }, [open])
 
   const dismiss = async (id) => {
-    await fetch(`/api/notifications/dismiss/${id}`, {
+    await fetch(`${API_BASE}/notifications/dismiss/${id}`, {
       method: 'POST', headers: { Authorization: `Bearer ${authToken}` },
     })
     setNotifications(ns => ns.filter(n => n.id !== id))
   }
 
   const dismissAll = async () => {
-    await fetch('/api/notifications/dismiss-all', {
+    await fetch(`${API_BASE}/notifications/dismiss-all`, {
       method: 'POST', headers: { Authorization: `Bearer ${authToken}` },
     })
     setNotifications([])

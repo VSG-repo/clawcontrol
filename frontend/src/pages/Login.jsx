@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
+import { API_BASE } from '@/config'
 
 export default function Login() {
   const [password, setPassword] = useState('')
@@ -12,7 +13,7 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),

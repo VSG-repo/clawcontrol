@@ -1,3 +1,4 @@
+import { API_BASE } from '@/config'
 /**
  * Alert detection — shared between Layout (badge count) and Alerts page (display).
  * All logic runs client-side against existing API endpoints.
@@ -9,9 +10,9 @@ export async function detectAlerts(authToken) {
   const alerts = []
 
   const [statusRes, logsRes, creditsRes] = await Promise.allSettled([
-    fetch('/api/status',  { headers }),
-    fetch('/api/logs?level=ERROR&limit=200', { headers }),
-    fetch('/api/credits', { headers }),
+    fetch(`${API_BASE}/status`,  { headers }),
+    fetch(`${API_BASE}/logs?level=ERROR&limit=200`, { headers }),
+    fetch(`${API_BASE}/credits`, { headers }),
   ])
 
   // ── /api/status ──────────────────────────────────────────────────────────

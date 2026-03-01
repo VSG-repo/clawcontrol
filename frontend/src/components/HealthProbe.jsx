@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import { CheckCircle, XCircle, Play, AlertTriangle } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 function formatTs(ts) {
   if (!ts) return '—'
@@ -14,7 +15,7 @@ export default function HealthProbe() {
   const runProbe = async () => {
     setRunning(true)
     try {
-      await fetch('/api/probe/run', {
+      await fetch(`${API_BASE}/probe/run`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}` },
       })

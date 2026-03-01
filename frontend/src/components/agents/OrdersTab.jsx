@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import { Send, Trash2, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 
@@ -152,7 +153,7 @@ export default function OrdersTab() {
   const loadAgents = useCallback(async () => {
     if (!authToken) return
     try {
-      const r = await fetch('/api/agents', { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/agents`, { headers: { Authorization: `Bearer ${authToken}` } })
       if (!r.ok) return
       const data = await r.json()
       const primary = data.primary ? [{ id: 'primary', name: data.primary.name || 'Primary Agent' }] : []
@@ -167,7 +168,7 @@ export default function OrdersTab() {
     if (!authToken) return
     setLoadingOrders(true)
     try {
-      const r = await fetch('/api/orders?limit=100', { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/orders?limit=100`, { headers: { Authorization: `Bearer ${authToken}` } })
       if (!r.ok) return
       const data = await r.json()
       setOrders(data.orders || [])
@@ -189,7 +190,7 @@ export default function OrdersTab() {
     const agentName = agents.find((a) => a.id === selectedAgentId)?.name || selectedAgentId
     setSending(true)
     try {
-      const r = await fetch('/api/orders', {
+      const r = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ agentId: selectedAgentId, agentName, directive: text }),
@@ -215,7 +216,7 @@ export default function OrdersTab() {
 
   const deleteOrder = async (id) => {
     try {
-      await fetch(`/api/orders/${id}`, {
+      await fetch(`${API_BASE}/orders/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       })
@@ -230,7 +231,7 @@ export default function OrdersTab() {
   const clearAll = async () => {
     setClearing(true)
     try {
-      await fetch('/api/orders', {
+      await fetch(`${API_BASE}/orders`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` },
       })

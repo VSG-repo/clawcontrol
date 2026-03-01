@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import { useDebugStore } from '@/store/useDebugStore'
+import { WS_BASE } from '@/config'
 
 const BASE_DELAY = 1000
 const MAX_DELAY = 30000
@@ -19,7 +20,7 @@ export function useWebSocket() {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return
 
     const token = useWagzStore.getState().authToken
-    const url = `ws://localhost:8000/ws${token ? `?token=${encodeURIComponent(token)}` : ''}`
+    const url = `${WS_BASE}/ws${token ? `?token=${encodeURIComponent(token)}` : ''}`
 
     try {
       const ws = new WebSocket(url)

@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
+import { API_BASE } from '@/config'
   Puzzle, ExternalLink, FolderOpen, FileText, RefreshCw, ChevronDown, ChevronRight,
 } from 'lucide-react'
 
@@ -26,7 +27,7 @@ function SkillCard({ skill, authToken }) {
     if (!open && content === null && skill.has_readme) {
       setLoading(true)
       try {
-        const res = await fetch(`/api/skills/${encodeURIComponent(skill.name)}`, {
+        const res = await fetch(`${API_BASE}/skills/${encodeURIComponent(skill.name)}`, {
           headers: { Authorization: `Bearer ${authToken}` },
         })
         const data = await res.json()
@@ -131,7 +132,7 @@ export default function Skills() {
   const fetchSkills = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/skills', {
+      const res = await fetch(`${API_BASE}/skills`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
       const data = await res.json()

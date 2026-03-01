@@ -3,13 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { useDebugStore } from './store/useDebugStore.js'
+import { API_BASE } from './config.js'
 
 // ── Global fetch interceptor ────────────────────────────────────────────────
 // Only instruments /api/ calls and openrouter requests.
 const _fetch = window.fetch
 window.fetch = async function (input, init) {
   const url = typeof input === 'string' ? input : (input instanceof Request ? input.url : String(input))
-  const isInstrumented = url.includes('/api/') || url.includes('openrouter')
+  const isInstrumented = url.includes(`${API_BASE}/`) || url.includes('openrouter')
   if (!isInstrumented) return _fetch(input, init)
 
   const method = (init?.method ?? 'GET').toUpperCase()

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import { Cpu, Save, RotateCcw, Activity } from 'lucide-react'
+import { API_BASE } from '@/config'
 
 function modelLabel(modelId, models) {
   const m = models.find((x) => x.model_id === modelId)
@@ -53,7 +54,7 @@ export default function Routing() {
     setLoading(true)
     setError('')
     try {
-      const r = await fetch('/api/routing', {
+      const r = await fetch(`${API_BASE}/routing`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
       if (!r.ok) throw new Error('Failed to load routing config')
@@ -78,7 +79,7 @@ export default function Routing() {
   const loadHeartbeat = async () => {
     if (!authToken) return
     try {
-      const r = await fetch('/api/heartbeat', {
+      const r = await fetch(`${API_BASE}/heartbeat`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
       if (!r.ok) return
@@ -93,7 +94,7 @@ export default function Routing() {
   const loadModelHealth = async () => {
     if (!authToken) return
     try {
-      const r = await fetch('/api/models', {
+      const r = await fetch(`${API_BASE}/models`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
       if (!r.ok) return
@@ -138,7 +139,7 @@ export default function Routing() {
         },
       }
 
-      const r = await fetch('/api/routing', {
+      const r = await fetch(`${API_BASE}/routing`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -168,7 +169,7 @@ export default function Routing() {
     setHeartbeatSaving(true)
     setHeartbeatError('')
     try {
-      const r = await fetch('/api/heartbeat', {
+      const r = await fetch(`${API_BASE}/heartbeat`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
 import {
+import { API_BASE } from '@/config'
   FileText, Send, Download, Tag, Plus, Trash2, Save,
   Braces, RotateCcw, ChevronDown, X, FolderOpen, Code,
 } from 'lucide-react'
@@ -142,7 +143,7 @@ function PromptsTab({ authToken, toast }) {
     if (!authToken) return
     setLoading(true)
     try {
-      const r = await fetch('/api/prompts', { headers: { Authorization: `Bearer ${authToken}` } })
+      const r = await fetch(`${API_BASE}/prompts`, { headers: { Authorization: `Bearer ${authToken}` } })
       if (!r.ok) return
       const data = await r.json()
       setPrompts(data.prompts || [])
@@ -166,7 +167,7 @@ function PromptsTab({ authToken, toast }) {
   const save = async (p) => {
     setSaving(true)
     try {
-      const r = await fetch(`/api/prompts/${p.id}`, {
+      const r = await fetch(`${API_BASE}/prompts/${p.id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: editTitle, content: editContent, category: editCat }),
@@ -179,7 +180,7 @@ function PromptsTab({ authToken, toast }) {
   }
 
   const del = async (id) => {
-    await fetch(`/api/prompts/${id}`, {
+    await fetch(`${API_BASE}/prompts/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${authToken}` },
     })
@@ -194,7 +195,7 @@ function PromptsTab({ authToken, toast }) {
   }
 
   const sendFilled = async (p) => {
-    const r = await fetch(`/api/prompts/${p.id}/send`, {
+    const r = await fetch(`${API_BASE}/prompts/${p.id}/send`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ variables: fillVars }),
@@ -210,7 +211,7 @@ function PromptsTab({ authToken, toast }) {
     if (!newTitle.trim()) return
     setCreating(true)
     try {
-      const r = await fetch('/api/prompts', {
+      const r = await fetch(`${API_BASE}/prompts`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: newTitle, content: newContent, category: newCat }),
@@ -519,8 +520,8 @@ function TemplatesTab({ authToken, toast }) {
     setLoading(true)
     try {
       const [tr, sr] = await Promise.allSettled([
-        fetch('/api/templates', { headers: { Authorization: `Bearer ${authToken}` } }),
-        fetch('/api/templates/starters', { headers: { Authorization: `Bearer ${authToken}` } }),
+        fetch(`${API_BASE}/templates`, { headers: { Authorization: `Bearer ${authToken}` } }),
+        fetch(`${API_BASE}/templates/starters`, { headers: { Authorization: `Bearer ${authToken}` } }),
       ])
       if (tr.status === 'fulfilled' && tr.value.ok) {
         const d = await tr.value.json()
@@ -562,7 +563,7 @@ function TemplatesTab({ authToken, toast }) {
   const save = async (t) => {
     setSaving(true)
     try {
-      const r = await fetch(`/api/templates/${t.id}`, {
+      const r = await fetch(`${API_BASE}/templates/${t.id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: editTitle, content: editContent, template_type: editType }),
@@ -576,7 +577,7 @@ function TemplatesTab({ authToken, toast }) {
   }
 
   const del = async (id) => {
-    await fetch(`/api/templates/${id}`, {
+    await fetch(`${API_BASE}/templates/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${authToken}` },
     })
@@ -588,7 +589,7 @@ function TemplatesTab({ authToken, toast }) {
   const doExport = async (t) => {
     setExporting(true)
     try {
-      const r = await fetch(`/api/templates/${t.id}/export`, {
+      const r = await fetch(`${API_BASE}/templates/${t.id}/export`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: exportPath }),
@@ -624,7 +625,7 @@ function TemplatesTab({ authToken, toast }) {
     if (!newTitle.trim()) return
     setCreating(true)
     try {
-      const r = await fetch('/api/templates', {
+      const r = await fetch(`${API_BASE}/templates`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: newTitle, content: newContent, template_type: newType }),

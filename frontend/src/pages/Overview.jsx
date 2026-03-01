@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { useWagzStore } from '@/store/useWagzStore'
 import { detectAlerts } from '@/services/alertDetector'
 import {
+import { API_BASE } from '@/config'
   RefreshCw, ArrowRight, Circle, Cpu, DollarSign,
   CheckCircle2, XCircle, Clock, Activity,
 } from 'lucide-react'
@@ -312,14 +313,14 @@ export default function Overview() {
     setLoading(true)
     try {
       const [statusRes, creditsRes, modelsRes, probeRes, logsRes, todayRes, agentsRes, ordersRes] = await Promise.allSettled([
-        fetch('/api/status',               { headers }).then((r) => r.json()),
-        fetch('/api/credits',              { headers }).then((r) => r.json()),
-        fetch('/api/models',               { headers }).then((r) => r.json()),
-        fetch('/api/health-probe',         { headers }).then((r) => r.json()),
-        fetch('/api/logs?level=ALL&limit=5&sources=gateway,audit', { headers }).then((r) => r.json()),
-        fetch(`/api/logs?level=ALL&limit=1000&since=${encodeURIComponent(todayStart())}&sources=gateway,audit`, { headers }).then((r) => r.json()),
-        fetch('/api/agents',               { headers }).then((r) => r.json()),
-        fetch('/api/orders?limit=5',       { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/status`,               { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/credits`,              { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/models`,               { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/health-probe`,         { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/logs?level=ALL&limit=5&sources=gateway,audit`, { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/logs?level=ALL&limit=1000&since=${encodeURIComponent(todayStart())}&sources=gateway,audit`, { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/agents`,               { headers }).then((r) => r.json()),
+        fetch(`${API_BASE}/orders?limit=5`,       { headers }).then((r) => r.json()),
       ])
 
       if (statusRes.status === 'fulfilled') setStatus(statusRes.value)
