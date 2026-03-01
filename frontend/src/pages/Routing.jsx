@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useWagzStore } from '@/store/useWagzStore'
-import { Cpu, Save, RotateCcw, Activity } from 'lucide-react'
+import { Cpu, Save, RotateCcw, Activity, Zap } from 'lucide-react'
 import { API_BASE } from '@/config'
 
 function modelLabel(modelId, models) {
@@ -49,6 +49,12 @@ export default function Routing() {
   const [heartbeatInterval, setHeartbeatInterval] = useState(300)
   const [heartbeatSaving, setHeartbeatSaving] = useState(false)
   const [heartbeatError, setHeartbeatError] = useState('')
+
+  const [intentEnabled, setIntentEnabled] = useState(false)
+  const [intentRules, setIntentRules] = useState([])
+  const [intentSaving, setIntentSaving] = useState(false)
+  const [intentError, setIntentError] = useState('')
+  const [intentJustSaved, setIntentJustSaved] = useState(false)
 
   const load = async () => {
     if (!authToken) return
@@ -107,10 +113,51 @@ export default function Routing() {
     }
   }
 
+  const loadIntentRouting = async () => {
+    if (!authToken) return
+    try {
+      const r = await fetch(`${API_BASE}/routing/intent`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      })
+      if (!r.ok) return
+      const data = await r.json()
+      setIntentEnabled(Boolean(data.intent_routing?.enabled))
+      setIntentRules(data.intent_routing?.rules || [])
+    } catch {
+      // no-op, keep defaults
+    }
+  }
+
+  const saveIntentRouting = async () => {
+    if (!authToken) return
+    setIntentSaving(true)
+    setIntentError('')
+    try {
+      const r = await fetch(`${API_BASE}/routing/intent`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          enabled: intentEnabled,
+          rules: intentRules.map((rule) => ({ id: rule.id, target_model: rule.target_model })),
+        }),
+      })
+      if (!r.ok) throw new Error('Failed to save intent routing config')
+      const data = await r.json()
+      setIntentRules(data.intent_routing?.rules || intentRules)
+      setIntentJustSaved(true)
+      setTimeout(() => setIntentJustSaved(false), 2000)
+    } catch (e) {
+      setIntentError(e.message || 'Unable to save intent routing config')
+    } finally {
+      setIntentSaving(false)
+    }
+  }
+
   useEffect(() => {
     load()
     loadModelHealth()
     loadHeartbeat()
+    loadIntentRouting()
   }, [authToken]) // eslint-disable-line
 
   useEffect(() => {
@@ -425,6 +472,108 @@ export default function Routing() {
 
           <div className="text-xs mt-3" style={{ color: '#555' }}>
             Last checked: {healthCheckedAt ? new Date(healthCheckedAt).toLocaleTimeString() : '—'}
+          </div>
+        </section>
+
+        {/* Row 4: Intent-Aware Routing — full width */}
+        <section className="p-4 rounded-md" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Zap size={13} color="#E8472A" />
+              <h2 className="text-sm font-semibold text-white">Intent-Aware Routing</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-xs cursor-pointer select-none" style={{ color: '#DDD' }}>
+                <input
+                  type="checkbox"
+                  checked={intentEnabled}
+                  onChange={(e) => setIntentEnabled(e.target.checked)}
+                />
+                Enabled
+              </label>
+              <button
+                onClick={saveIntentRouting}
+                disabled={intentSaving}
+                className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-md transition-colors"
+                style={{
+                  background: intentJustSaved ? '#22C55E' : '#1A1A1A',
+                  border: `1px solid ${intentJustSaved ? '#22C55E' : '#2A2A2A'}`,
+                  color: intentJustSaved ? '#fff' : '#999',
+                }}
+              >
+                <Save size={12} className={intentSaving ? 'animate-pulse' : ''} />
+                {intentJustSaved ? 'Saved ✓' : 'Save'}
+              </button>
+            </div>
+          </div>
+
+          <p className="text-xs mb-3" style={{ color: '#666' }}>
+            Automatically route messages to specialized models based on detected intent. Rules are evaluated in priority order — first match wins. Disabled by default; single-model users are unaffected.
+          </p>
+
+          {intentError && (
+            <div className="mb-3 text-xs px-3 py-2 rounded" style={{ background: '#E0525215', border: '1px solid #E0525240', color: '#E05252' }}>
+              {intentError}
+            </div>
+          )}
+
+          {/* Rules table */}
+          <div
+            className="rounded-md overflow-hidden"
+            style={{
+              border: '1px solid #2A2A2A',
+              opacity: intentEnabled ? 1 : 0.45,
+              transition: 'opacity 0.2s',
+            }}
+          >
+            {/* Header */}
+            <div
+              className="grid text-xs font-semibold px-3 py-2"
+              style={{
+                gridTemplateColumns: '40px 1fr 2fr',
+                background: '#111',
+                color: '#666',
+                borderBottom: '1px solid #2A2A2A',
+              }}
+            >
+              <span>#</span>
+              <span>Condition</span>
+              <span>Target Model</span>
+            </div>
+
+            {intentRules.map((rule, idx) => (
+              <div
+                key={rule.id}
+                className="grid items-center gap-3 px-3 py-2.5"
+                style={{
+                  gridTemplateColumns: '40px 1fr 2fr',
+                  background: idx % 2 === 0 ? '#151515' : '#111',
+                  borderBottom: idx < intentRules.length - 1 ? '1px solid #1E1E1E' : 'none',
+                }}
+              >
+                <span className="text-xs font-mono" style={{ color: '#555' }}>{rule.priority}</span>
+                <div>
+                  <div className="text-sm" style={{ color: '#DDD' }}>{rule.label}</div>
+                  <div className="text-xs mt-0.5" style={{ color: '#555' }}>{rule.description}</div>
+                </div>
+                <input
+                  type="text"
+                  value={rule.target_model}
+                  onChange={(e) => setIntentRules(intentRules.map((r) =>
+                    r.id === rule.id ? { ...r, target_model: e.target.value } : r
+                  ))}
+                  disabled={!intentEnabled}
+                  className="text-xs px-2 py-1.5 rounded-md w-full font-mono"
+                  style={{
+                    background: '#0D0D0D',
+                    border: '1px solid #2A2A2A',
+                    color: intentEnabled ? '#CCC' : '#555',
+                    outline: 'none',
+                  }}
+                  placeholder="openrouter/..."
+                />
+              </div>
+            ))}
           </div>
         </section>
 

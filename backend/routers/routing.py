@@ -51,6 +51,16 @@ class HeartbeatUpdate(BaseModel):
     interval_seconds: int
 
 
+class IntentRuleUpdate(BaseModel):
+    id: str
+    target_model: str
+
+
+class IntentRoutingUpdate(BaseModel):
+    enabled: Optional[bool] = None
+    rules: Optional[list[IntentRuleUpdate]] = None
+
+
 # ── IO helpers ────────────────────────────────────────────────────────────────
 
 def _atomic_write_json(path: Path, data: dict) -> None:
@@ -151,6 +161,55 @@ def _apply_routing(oc: dict, cc: dict, routing: dict) -> None:
     _atomic_write_json(CLAWCONTROL_CONFIG, cc)
 
 
+# ── Intent routing logic ──────────────────────────────────────────────────────
+
+_DEFAULT_INTENT_RULES: list[dict] = [
+    {
+        "id": "has_image",
+        "label": "Image Detected",
+        "description": "Message contains an image attachment",
+        "target_model": "openrouter/qwen/qwen3.5-flash-02-23",
+        "priority": 1,
+    },
+    {
+        "id": "has_code",
+        "label": "Code Detected",
+        "description": "Message contains code fences (```) or code keywords",
+        "target_model": "openai-codex/gpt-5.1-codex-max",
+        "priority": 2,
+    },
+    {
+        "id": "short_routine",
+        "label": "Short / Routine",
+        "description": "Estimated token count < 200, no code or image detected",
+        "target_model": "openrouter/openai/gpt-oss-20b",
+        "priority": 3,
+    },
+]
+
+_KNOWN_INTENT_IDS = {r["id"] for r in _DEFAULT_INTENT_RULES}
+
+
+def _intent_routing_from_cc(cc: dict) -> dict:
+    ir = cc.get("intent_routing", {})
+    if not isinstance(ir, dict):
+        return {"enabled": False, "rules": list(_DEFAULT_INTENT_RULES)}
+    enabled = bool(ir.get("enabled", False))
+    rules = ir.get("rules")
+    if not isinstance(rules, list):
+        rules = list(_DEFAULT_INTENT_RULES)
+    else:
+        rules = [r for r in rules if isinstance(r, dict) and r.get("id") in _KNOWN_INTENT_IDS]
+        if len(rules) != len(_DEFAULT_INTENT_RULES):
+            rules = list(_DEFAULT_INTENT_RULES)
+    return {"enabled": enabled, "rules": sorted(rules, key=lambda r: r.get("priority", 99))}
+
+
+def _apply_intent_routing_to_cc(cc: dict, intent: dict) -> None:
+    cc["intent_routing"] = intent
+    _atomic_write_json(CLAWCONTROL_CONFIG, cc)
+
+
 # ── Heartbeat logic ───────────────────────────────────────────────────────────
 
 def _heartbeat_from_cc(cc: dict) -> dict:
@@ -247,3 +306,30 @@ def update_heartbeat(body: HeartbeatUpdate, _=Depends(require_auth)):
     _apply_heartbeat_to_cc(cc, heartbeat)
 
     return {"ok": True, "heartbeat": heartbeat}
+
+
+@router.get("/api/routing/intent")
+def get_intent_routing(_=Depends(require_auth)):
+    cc = _load_cc()
+    intent = _intent_routing_from_cc(cc)
+    _apply_intent_routing_to_cc(cc, intent)
+    return {"ok": True, "intent_routing": intent}
+
+
+@router.post("/api/routing/intent")
+def update_intent_routing(body: IntentRoutingUpdate, _=Depends(require_auth)):
+    cc = _load_cc()
+    intent = _intent_routing_from_cc(cc)
+
+    if body.enabled is not None:
+        intent["enabled"] = bool(body.enabled)
+
+    if body.rules is not None:
+        rule_map = {r["id"]: r for r in intent["rules"]}
+        for upd in body.rules:
+            if upd.id in rule_map and upd.target_model.strip():
+                rule_map[upd.id]["target_model"] = upd.target_model.strip()
+        intent["rules"] = sorted(rule_map.values(), key=lambda r: r.get("priority", 99))
+
+    _apply_intent_routing_to_cc(cc, intent)
+    return {"ok": True, "intent_routing": intent}

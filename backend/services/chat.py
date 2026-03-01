@@ -63,6 +63,53 @@ def _sse(data: dict) -> str:
 
 _ATTACHMENT_SIZE_LIMIT = 20 * 1024 * 1024  # 20 MB of base64 characters
 
+_CLAWCONTROL_CONFIG = os.path.expanduser("~/.openclaw/clawcontrol.json")
+
+_CODE_KEYWORDS: frozenset[str] = frozenset({
+    "def ", "function ", "class ", "import ", "const ", "let ", "var ",
+    "return ", "SELECT ", "FROM ", "WHERE ",
+})
+
+
+def _load_intent_routing() -> dict:
+    """Read intent_routing from clawcontrol.json. Returns disabled config on any error."""
+    try:
+        with open(_CLAWCONTROL_CONFIG, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        ir = data.get("intent_routing", {})
+        return ir if isinstance(ir, dict) else {}
+    except Exception:
+        return {}
+
+
+def _classify_intent(messages: list[dict], has_images: bool) -> Optional[str]:
+    """
+    Rule-based intent classifier. Returns a rule id or None if no rule matches.
+    Priority: has_image > has_code > short_routine.
+    """
+    if has_images:
+        return "has_image"
+
+    # Extract last user message text for code detection
+    last_user_text = ""
+    for m in reversed(messages):
+        if m.get("role") == "user":
+            content = m.get("content", "")
+            last_user_text = content if isinstance(content, str) else ""
+            break
+
+    if "```" in last_user_text or any(kw in last_user_text for kw in _CODE_KEYWORDS):
+        return "has_code"
+
+    # Token estimate across full conversation for routine detection
+    all_text = " ".join(
+        m.get("content", "") for m in messages if isinstance(m.get("content"), str)
+    )
+    if _estimate_tokens(all_text) < 200:
+        return "short_routine"
+
+    return None
+
 
 def _build_multimodal_content(text: str, attachments: list[dict]):
     """
@@ -145,8 +192,24 @@ async def stream_chat(
                 }
                 break
 
-    # ── Vision model routing ──────────────────────────────────────────────────
+    # ── Intent-aware routing ──────────────────────────────────────────────────
     has_images = bool(attachments and any(a.get("type") == "image" for a in attachments))
+    intent_routed: bool = False
+    intent_rule_id: Optional[str] = None
+
+    _ir = _load_intent_routing()
+    if _ir.get("enabled"):
+        _rule_id = _classify_intent(messages, has_images)
+        if _rule_id is not None:
+            _rule_map = {r["id"]: r for r in _ir.get("rules", []) if isinstance(r, dict)}
+            _matched = _rule_map.get(_rule_id)
+            if _matched and _matched.get("target_model", "").strip():
+                intent_routed = True
+                intent_rule_id = _rule_id
+                requested_model_id = _matched["target_model"]
+                openrouter_model_id = requested_model_id.removeprefix("openrouter/")
+
+    # ── Vision model routing ──────────────────────────────────────────────────
     auto_switched: bool = False
     auto_switched_from: Optional[str] = None
 
@@ -257,6 +320,8 @@ async def stream_chat(
                             "failover_from": failover_from,
                             "auto_switched": auto_switched,
                             "auto_switched_from": auto_switched_from,
+                            "intent_routed": intent_routed,
+                            "intent_rule_id": intent_rule_id,
                         })
 
                     for choice in chunk.get("choices", []):
