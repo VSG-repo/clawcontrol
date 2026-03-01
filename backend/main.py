@@ -72,7 +72,7 @@ def _migrate_to_clawcontrol():
 _migrate_to_clawcontrol()
 
 import asyncio
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -164,6 +164,16 @@ async def verify(token: str = Depends(get_token_from_header)):
     if not token or not decode_token(token):
         raise HTTPException(status_code=401, detail="Invalid token")
     return {"ok": True}
+
+
+@app.get("/api/auth/auto")
+async def auto_login(request: Request):
+    """Return a token automatically for localhost connections (no password needed)."""
+    client_host = request.client.host if request.client else ""
+    if client_host not in ("127.0.0.1", "::1", "localhost"):
+        raise HTTPException(status_code=403, detail="Auto-login only available on localhost")
+    token = create_token({"sub": "wagz"})
+    return {"token": token}
 
 
 # WebSocket endpoint

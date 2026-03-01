@@ -91,7 +91,7 @@ function ProtectedApp() {
 export default function App() {
   const { isAuthenticated, setAuthenticated } = useWagzStore()
 
-  // Restore session from localStorage
+  // Restore session from localStorage, or auto-login on localhost
   useEffect(() => {
     const token = localStorage.getItem('wagz_token')
     if (token) {
@@ -100,9 +100,32 @@ export default function App() {
       })
         .then((res) => {
           if (res.ok) setAuthenticated(token)
-          else localStorage.removeItem('wagz_token')
+          else {
+            localStorage.removeItem('wagz_token')
+            return tryAutoLogin()
+          }
         })
-        .catch(() => localStorage.removeItem('wagz_token'))
+        .catch(() => {
+          localStorage.removeItem('wagz_token')
+          tryAutoLogin()
+        })
+    } else {
+      tryAutoLogin()
+    }
+
+    function tryAutoLogin() {
+      fetch('/api/auth/auto')
+        .then((res) => {
+          if (res.ok) return res.json()
+          throw new Error('not localhost')
+        })
+        .then((data) => {
+          if (data.token) {
+            localStorage.setItem('wagz_token', data.token)
+            setAuthenticated(data.token)
+          }
+        })
+        .catch(() => {/* remote access — show login page */})
     }
   }, [setAuthenticated])
 

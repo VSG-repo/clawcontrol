@@ -6,7 +6,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status, Query
+from fastapi import Depends, HTTPException, Request, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -52,7 +52,11 @@ def get_token_from_header(
     return token_query
 
 
-def require_auth(token: Optional[str] = Depends(get_token_from_header)):
+def require_auth(request: Request, token: Optional[str] = Depends(get_token_from_header)):
+    # Localhost connections bypass auth — only the local machine can reach 127.0.0.1:8000
+    client_host = request.client.host if request.client else ""
+    if client_host in ("127.0.0.1", "::1", "localhost"):
+        return {"sub": "wagz", "localhost": True}
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     payload = decode_token(token)
