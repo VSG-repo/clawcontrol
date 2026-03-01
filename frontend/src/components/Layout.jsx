@@ -206,7 +206,7 @@ export default function Layout({ children }) {
                       <>
                         <div className="overflow-y-auto" style={{ maxHeight: '240px', marginLeft: '8px' }}>
                           {sessions.length === 0 ? (
-                            <p className="px-2 py-2 text-xs" style={{ color: '#2A2A2A' }}>
+                            <p className="px-2 py-2 text-xs" style={{ color: '#555' }}>
                               No sessions yet
                             </p>
                           ) : (
