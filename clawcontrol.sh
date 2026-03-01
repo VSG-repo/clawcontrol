@@ -16,13 +16,13 @@ fi
 # Open in app mode (standalone window, no browser chrome)
 # Try common browser paths
 if command -v google-chrome &>/dev/null; then
-  google-chrome --app=http://localhost:3000 &
+  google-chrome --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
 elif command -v google-chrome-stable &>/dev/null; then
-  google-chrome-stable --app=http://localhost:3000 &
+  google-chrome-stable --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
 elif command -v chromium-browser &>/dev/null; then
-  chromium-browser --app=http://localhost:3000 &
+  chromium-browser --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
 elif command -v microsoft-edge &>/dev/null; then
-  microsoft-edge --app=http://localhost:3000 &
+  microsoft-edge --app=http://localhost:3000 --user-data-dir="$HOME/.clawcontrol-chrome" &
 else
   xdg-open http://localhost:3000 &
 fi
