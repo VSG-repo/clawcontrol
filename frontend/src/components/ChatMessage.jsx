@@ -72,7 +72,7 @@ function LatencyBadge({ msg }) {
   return (
     <span
       className="flex items-center gap-1 text-xs tabular-nums"
-      style={{ color: isStreaming ? '#E8472A' : '#555' }}
+      style={{ color: isStreaming ? '#E8472A' : '#777' }}
     >
       {isStreaming && (
         <span
