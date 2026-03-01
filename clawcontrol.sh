@@ -15,7 +15,7 @@ fi
 
 # Open as standalone app window
 CHROME=""
-for cmd in google-chrome google-chrome-stable chromium-browser chromium microsoft-edge; do
+for cmd in brave-browser brave brave-browser-stable google-chrome google-chrome-stable chromium-browser chromium microsoft-edge; do
   if command -v "$cmd" &>/dev/null; then
     CHROME="$cmd"
     break
