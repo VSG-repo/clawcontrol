@@ -185,13 +185,13 @@ export default function Layout({ children }) {
                         <button
                           onClick={() => setChatsOpen((v) => !v)}
                           className="flex-shrink-0 flex items-center justify-center"
-                          style={{ width: '28px', height: '32px', color: chatsOpen ? '#888' : '#444' }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = '#888')}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = chatsOpen ? '#888' : '#444')}
+                          style={{ width: '28px', height: '32px', color: isChatRoute ? '#FFFFFF' : '#999999' }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = isChatRoute ? '#FFFFFF' : '#CCCCCC')}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = isChatRoute ? '#FFFFFF' : '#999999')}
                           title={chatsOpen ? 'Collapse sessions' : 'Expand sessions'}
                         >
                           <ChevronDown
-                            size={10}
+                            size={13}
                             style={{
                               transform: chatsOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
                               transition: 'transform 0.15s ease',
