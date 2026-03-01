@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import Optional
 from uuid import uuid4
 
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from auth import require_auth
 
@@ -100,26 +101,29 @@ def _set_custom_agents(cc: dict, agents: list) -> None:
 
 # ── Pydantic models ────────────────────────────────────────────────────────────
 
+_AgentStatus = Literal["idle", "running", "error", "stopped"]
+
+
 class AgentCreate(BaseModel):
-    name: str
-    model: str
-    identity: Optional[str] = None
-    systemPrompt: Optional[str] = None
-    skills: Optional[list[str]] = []
-    status: Optional[str] = "idle"
+    name: str = Field(min_length=1, max_length=100)
+    model: str = Field(min_length=1, max_length=200)
+    identity: Optional[str] = Field(None, max_length=2_000)
+    systemPrompt: Optional[str] = Field(None, max_length=16_000)
+    skills: Optional[list[str]] = Field(default=[], max_length=50)
+    status: Optional[_AgentStatus] = "idle"
 
 
 class AgentUpdate(BaseModel):
-    name: Optional[str] = None
-    model: Optional[str] = None
-    identity: Optional[str] = None
-    systemPrompt: Optional[str] = None
-    skills: Optional[list[str]] = None
-    status: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    model: Optional[str] = Field(None, min_length=1, max_length=200)
+    identity: Optional[str] = Field(None, max_length=2_000)
+    systemPrompt: Optional[str] = Field(None, max_length=16_000)
+    skills: Optional[list[str]] = Field(None, max_length=50)
+    status: Optional[_AgentStatus] = None
 
 
 class PrimaryNameUpdate(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=100)
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from auth import require_auth
 import services.notifications as notif_svc
@@ -30,10 +30,10 @@ async def get_settings():
 
 
 class SettingsUpdate(BaseModel):
-    credit_floor: Optional[float] = None
-    burn_ceiling_24h: Optional[float] = None
-    cpu_temp_threshold: Optional[float] = None
-    probe_failures: Optional[int] = None
+    credit_floor:       Optional[float] = Field(None, ge=0.0, le=10_000.0)
+    burn_ceiling_24h:   Optional[float] = Field(None, ge=0.0, le=10_000.0)
+    cpu_temp_threshold: Optional[float] = Field(None, ge=0.0, le=200.0)
+    probe_failures:     Optional[int]   = Field(None, ge=1, le=100)
 
 
 @router.post("/settings")

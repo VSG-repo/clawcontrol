@@ -7,12 +7,12 @@ import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Any, Literal, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import PlainTextResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from auth import require_auth
 
@@ -140,36 +140,56 @@ code blocks, lists, and headings where appropriate.
 
 # ── Pydantic models ────────────────────────────────────────────────────────────
 
+_TemplateType = Literal["skill", "readme", "system_prompt", "custom"]
+
+
 class PromptCreate(BaseModel):
-    title: str
-    content: str
-    category: Optional[str] = "custom"
+    title: str = Field(min_length=1, max_length=200)
+    content: str = Field(min_length=1, max_length=64_000)
+    category: Optional[str] = Field("custom", max_length=50)
 
 
 class PromptUpdate(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    category: Optional[str] = None
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    content: Optional[str] = Field(None, min_length=1, max_length=64_000)
+    category: Optional[str] = Field(None, max_length=50)
 
 
 class PromptSend(BaseModel):
-    variables: Optional[dict] = {}
+    variables: Optional[dict[str, Any]] = Field(default={})
+
+    @field_validator("variables")
+    @classmethod
+    def validate_variables(cls, v: dict | None) -> dict:
+        if not v:
+            return {}
+        if len(v) > 50:
+            raise ValueError("Too many variables (max 50)")
+        result: dict[str, str] = {}
+        for key, value in v.items():
+            if len(str(key)) > 100:
+                raise ValueError(f"Variable key too long (max 100 chars): {str(key)[:40]!r}")
+            str_val = str(value)
+            if len(str_val) > 10_000:
+                raise ValueError(f"Variable value too long for key {str(key)[:40]!r} (max 10 000 chars)")
+            result[str(key)] = str_val
+        return result
 
 
 class TemplateCreate(BaseModel):
-    title: str
-    content: str
-    template_type: Optional[str] = "custom"
+    title: str = Field(min_length=1, max_length=200)
+    content: str = Field(min_length=0, max_length=128_000)
+    template_type: Optional[_TemplateType] = "custom"
 
 
 class TemplateUpdate(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    template_type: Optional[str] = None
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    content: Optional[str] = Field(None, min_length=0, max_length=128_000)
+    template_type: Optional[_TemplateType] = None
 
 
 class TemplateExport(BaseModel):
-    path: str
+    path: str = Field(min_length=1, max_length=500)
 
 
 # ── IO helpers ─────────────────────────────────────────────────────────────────

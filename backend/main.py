@@ -74,7 +74,7 @@ _migrate_to_clawcontrol()
 import asyncio
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from auth import verify_password, create_token, decode_token, require_auth, get_token_from_header
 from services.rate_limiter import limiter as _rate_limiter
@@ -200,7 +200,7 @@ def _check_rate(request: Request, prefix: str, limit: int, window: int = 60) -> 
 
 # Auth endpoints
 class LoginRequest(BaseModel):
-    password: str
+    password: str = Field(min_length=1, max_length=128)
 
 
 @app.post("/api/auth/login")

@@ -7,11 +7,12 @@ Chat router.
 """
 import json
 import uuid
-from typing import Optional, Dict, List
+from typing import Literal, Optional, Dict, List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from auth import require_auth
 from services.chat import stream_chat
@@ -22,17 +23,24 @@ router = APIRouter()
 _conversations: Dict[str, List[dict]] = {}
 
 
+class Attachment(BaseModel):
+    type: Literal["image", "file"]
+    name: str = Field(min_length=1, max_length=255)
+    data: str = Field(min_length=1)              # base64 data-URI; total size checked in stream_chat
+    mime: Optional[str] = Field(None, max_length=100)
+
+
 class SendRequest(BaseModel):
-    message: str
-    context_id: Optional[str] = None
-    model_id: Optional[str] = None  # None = gateway picks primary
+    message: str = Field(min_length=0, max_length=32_000)
+    context_id: Optional[UUID] = None           # validated UUID; None = new conversation
+    model_id: Optional[str] = Field(None, max_length=200)
     new_thread: bool = False
-    attachments: list[dict] = []
+    attachments: list[Attachment] = Field(default=[], max_length=10)
 
 
 @router.post("/api/chat/send")
 async def chat_send(req: SendRequest, _=Depends(require_auth)):
-    context_id = req.context_id or str(uuid.uuid4())
+    context_id = str(req.context_id) if req.context_id else str(uuid.uuid4())
 
     if req.new_thread or context_id not in _conversations:
         _conversations[context_id] = []
@@ -50,7 +58,7 @@ async def chat_send(req: SendRequest, _=Depends(require_auth)):
             messages=list(history),
             model_id=req.model_id,
             request_id=request_id,
-            attachments=req.attachments,
+            attachments=[a.model_dump() for a in req.attachments],
         ):
             # Track assistant content for history storage
             if event_str.startswith("data: "):

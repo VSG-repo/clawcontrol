@@ -11,7 +11,8 @@ from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+from validators import validate_cron_expression
 
 from auth import require_auth
 
@@ -92,21 +93,33 @@ def _get_custom_jobs(cc: dict) -> list:
 # ── Pydantic models ────────────────────────────────────────────────────────────
 
 class CronCreate(BaseModel):
-    name:        str
-    agentId:     str
-    schedule:    str
-    directive:   str
-    description: Optional[str] = ""
+    name:        str           = Field(min_length=1, max_length=100)
+    agentId:     str           = Field(min_length=1, max_length=64)
+    schedule:    str           = Field(min_length=1, max_length=100)
+    directive:   str           = Field(min_length=1, max_length=16_000)
+    description: Optional[str] = Field("", max_length=500)
     enabled:     Optional[bool] = True
+
+    @field_validator("schedule")
+    @classmethod
+    def check_schedule(cls, v: str) -> str:
+        return validate_cron_expression(v.strip())
 
 
 class CronUpdate(BaseModel):
-    name:        Optional[str]  = None
-    agentId:     Optional[str]  = None
-    schedule:    Optional[str]  = None
-    directive:   Optional[str]  = None
-    description: Optional[str]  = None
+    name:        Optional[str]  = Field(None, min_length=1, max_length=100)
+    agentId:     Optional[str]  = Field(None, min_length=1, max_length=64)
+    schedule:    Optional[str]  = Field(None, min_length=1, max_length=100)
+    directive:   Optional[str]  = Field(None, min_length=1, max_length=16_000)
+    description: Optional[str]  = Field(None, max_length=500)
     enabled:     Optional[bool] = None
+
+    @field_validator("schedule")
+    @classmethod
+    def check_schedule(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return validate_cron_expression(v.strip())
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────

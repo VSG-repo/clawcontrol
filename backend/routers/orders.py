@@ -10,7 +10,7 @@ from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from auth import require_auth
 
@@ -51,9 +51,9 @@ def _get_orders(cc: dict) -> list:
 # ── Pydantic models ────────────────────────────────────────────────────────────
 
 class OrderCreate(BaseModel):
-    agentId:   str
-    agentName: str
-    directive: str
+    agentId:   str = Field(min_length=1, max_length=64)
+    agentName: str = Field(min_length=1, max_length=100)
+    directive: str = Field(min_length=1, max_length=16_000)
 
 
 # ── Endpoints ──────────────────────────────────────────────────────────────────
