@@ -34,6 +34,7 @@ export default function Routing() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [savedAt, setSavedAt] = useState('')
+  const [justSaved, setJustSaved] = useState(false)
 
   const [primaryModelId, setPrimaryModelId] = useState('')
   const [fallbackModelIds, setFallbackModelIds] = useState([])
@@ -150,6 +151,8 @@ export default function Routing() {
 
       if (!r.ok) throw new Error('Failed to save routing config')
       setSavedAt(new Date().toISOString())
+      setJustSaved(true)
+      setTimeout(() => setJustSaved(false), 2000)
       await load()
     } catch (e) {
       setError(e.message || 'Unable to save routing config')
@@ -231,11 +234,15 @@ export default function Routing() {
           <button
             onClick={save}
             disabled={loading || saving}
-            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-md"
-            style={{ background: '#E8472A', color: '#fff', border: '1px solid #E8472A' }}
+            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-md transition-colors"
+            style={{
+              background: justSaved ? '#22C55E' : '#E8472A',
+              color: '#fff',
+              border: `1px solid ${justSaved ? '#22C55E' : '#E8472A'}`,
+            }}
           >
             <Save size={12} className={saving ? 'animate-pulse' : ''} />
-            Save
+            {justSaved ? 'Saved ✓' : 'Save'}
           </button>
         </div>
       </div>
@@ -330,15 +337,20 @@ export default function Routing() {
                 ))}
               </select>
 
-              <input
-                type="number"
-                min="0"
-                value={overrideRequests}
-                onChange={(e) => setOverrideRequests(e.target.value)}
-                className="text-sm px-3 py-2 rounded-md"
-                style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
-                placeholder="Requests remaining"
-              />
+              <div>
+                <input
+                  type="number"
+                  min="0"
+                  value={overrideRequests}
+                  onChange={(e) => setOverrideRequests(e.target.value)}
+                  className="w-full text-sm px-3 py-2 rounded-md"
+                  style={{ background: '#111', border: '1px solid #2A2A2A', color: '#fff' }}
+                  placeholder="Requests remaining"
+                />
+                <p className="mt-1.5 text-xs leading-snug" style={{ color: '#666' }}>
+                  Weight controls how often this model is selected. 0 = disabled, higher = more traffic routed to this model.
+                </p>
+              </div>
             </div>
           </section>
 

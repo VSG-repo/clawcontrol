@@ -45,6 +45,8 @@ function ModelSelector({ models, selected, onSelect }) {
 
   return (
     <div className="relative">
+      <div className="flex flex-col items-start gap-0.5">
+      <p className="text-xs" style={{ color: '#555' }}>Click to change model</p>
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs transition-colors"
@@ -69,6 +71,7 @@ function ModelSelector({ models, selected, onSelect }) {
           <span className="ml-1" style={{ color: '#E8472A', fontSize: '9px' }}>FORCED</span>
         )}
       </button>
+      </div>
 
       {open && (
         <>
