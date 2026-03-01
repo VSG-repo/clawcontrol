@@ -8,7 +8,7 @@
  *   - Cost/token/latency footer
  *   - Expandable metadata drawer
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, ChevronUp, Zap, Copy, Check } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -37,6 +37,52 @@ function formatCost(usd) {
 function formatLatency(ms) {
   if (ms == null) return '—'
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`
+}
+
+function formatLive(ms) {
+  return `${(ms / 1000).toFixed(1)}s`
+}
+
+function LatencyBadge({ msg }) {
+  const [elapsed, setElapsed] = useState(() =>
+    msg.startedAt ? Date.now() - msg.startedAt : 0
+  )
+  const intervalRef = useRef(null)
+
+  useEffect(() => {
+    if (msg.status !== 'streaming') {
+      clearInterval(intervalRef.current)
+      return
+    }
+    intervalRef.current = setInterval(() => {
+      setElapsed(Date.now() - (msg.startedAt ?? Date.now()))
+    }, 100)
+    return () => clearInterval(intervalRef.current)
+  }, [msg.status, msg.startedAt])
+
+  const isStreaming = msg.status === 'streaming'
+  const display = isStreaming
+    ? formatLive(elapsed)
+    : msg.latency_ms != null
+      ? formatLive(msg.latency_ms)
+      : null
+
+  if (!display) return null
+
+  return (
+    <span
+      className="flex items-center gap-1 text-xs tabular-nums"
+      style={{ color: isStreaming ? '#E8472A' : '#555' }}
+    >
+      {isStreaming && (
+        <span
+          className="inline-block w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0"
+          style={{ background: '#E8472A' }}
+        />
+      )}
+      ⏱ {display}
+    </span>
+  )
 }
 
 function MetadataDrawer({ msg }) {
@@ -231,16 +277,8 @@ export default function ChatMessage({ msg }) {
           </span>
         )}
 
-        {/* Streaming dot */}
-        {isStreaming && (
-          <span className="flex items-center gap-1 text-xs" style={{ color: '#555' }}>
-            <span
-              className="inline-block w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: '#E8472A' }}
-            />
-            Streaming…
-          </span>
-        )}
+        {/* Live latency timer — ticks during streaming, shows final time when done */}
+        <LatencyBadge msg={msg} />
 
         <div className="ml-auto flex items-center gap-1">
           {hasContent && <CopyButton text={msg.content} />}
@@ -290,8 +328,6 @@ export default function ChatMessage({ msg }) {
           className="flex items-center gap-3 mt-1.5 px-1 text-xs"
           style={{ color: '#444' }}
         >
-          <span>{formatLatency(msg.latency_ms)}</span>
-          <span>·</span>
           <span>{msg.token_estimate != null ? `${msg.token_estimate} tok` : ''}</span>
           <span>·</span>
           <span>{formatCost(msg.cost_estimate)}</span>

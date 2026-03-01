@@ -30,6 +30,7 @@ function makeAssistantMsg(requestId, requestedModelId = null) {
     role: 'assistant',
     content: '',
     ts: new Date().toISOString(),
+    startedAt: Date.now(),
     status: 'streaming',
     model: requestedModelId ? requestedModelId.split('/').pop() : null,
     model_id: requestedModelId,
