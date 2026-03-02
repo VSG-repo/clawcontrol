@@ -8,7 +8,16 @@ ClawControl gives you a single, self-hosted interface to observe, control, and i
 
 ## Screenshots
 
-> _Screenshots coming soon. Run it locally and explore._
+| | |
+|---|---|
+| ![Mission Control](./screenshots/01-dashboard.png) | ![Routing](./screenshots/02-routing.png) |
+| **Mission Control** — live metrics, gateway status, credit balance | **Routing** — primary model, fallbacks, manual override, intent rules |
+| ![Chat](./screenshots/03-chat.png) | ![Skills](./screenshots/04-skills.png) |
+| **Chat** — SSE streaming, vision upload, live latency counter | **Skills Manager** — browse and inspect installed OpenClaw skills |
+| ![Agents](./screenshots/05-agents.png) | ![Intent Routing](./screenshots/06-intent-routing.png) |
+| **Agents Factory** — fleet, orders, cron scheduler | **Intent-Aware Routing** — rule-based model routing by message type |
+
+> _Replace placeholder images with actual screenshots once running locally._
 
 ---
 
