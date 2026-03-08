@@ -51,7 +51,9 @@
       "Bash(pip3 show:*)",
       "Bash(pip3 install:*)",
       "Bash(sudo systemctl:*)",
-      "Bash(sudo journalctl:*)"
+      "Bash(sudo journalctl:*)",
+      "Bash(source:*)",
+      "Bash(openclaw approvals:*)"
     ]
   }
 }
