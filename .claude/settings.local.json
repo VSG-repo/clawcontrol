@@ -40,7 +40,18 @@
       "Bash(pkill:*)",
       "Bash(fuser:*)",
       "Bash(pgrep:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(ls:*)",
+      "Bash(convert:*)",
+      "Bash(update-desktop-database:*)",
+      "Bash(npx vite:*)",
+      "Bash(pip3 freeze:*)",
+      "Bash(node:*)",
+      "Bash(/home/wagz/.npm-global/bin/openclaw:*)",
+      "Bash(pip3 show:*)",
+      "Bash(pip3 install:*)",
+      "Bash(sudo systemctl:*)",
+      "Bash(sudo journalctl:*)"
     ]
   }
 }
